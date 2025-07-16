@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Teste de Depuração</h1>
+
+    <div id="test-metrics">
+      <h2>Métricas:</h2>
+      <p>Total de Contas: <span id="metricContas">Carregando...</span></p>
+      <p>Erros do Mês: <span id="metricErros">Carregando...</span></p>
+      <p>MTMO Total: <span id="metricMtmo">Carregando...</span></p>
+      <p>Canais Ativos: <span id="metricCanais">Carregando...</span></p>
+    </div>
+
+    <div id="test-accounts">
+      <h2>Árvore de Contas:</h2>
+      <div id="accountsTree">Carregando...</div>
+    </div>
+
+    <div id="test-ranking">
+      <h2>Ranking:</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Status</th>
+            <th>Contatos</th>
+          </tr>
+        </thead>
+        <tbody id="rankingTableBody">
+          <tr>
+            <td colspan="4">Carregando...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Script de teste simplificado
+      console.log("=== INICIANDO TESTE DE DEBUG ===");
+
+      // Dados simplificados
+      const testData = {
+        contas: [
+          {
+            id: 1,
+            nome: "Conta Teste 1",
+            tipo: "Enterprise",
+            status: "Active",
+            contatos: 1000,
+            mtmo: 500,
+            subcontas: [],
+          },
+          {
+            id: 2,
+            nome: "Conta Teste 2",
+            tipo: "Department",
+            status: "Trial",
+            contatos: 500,
+            mtmo: 200,
+            subcontas: [],
+          },
+        ],
+        metricas: {
+          totalContas: { valor: 2, variacao: "+100%" },
+          errosDoMes: { valor: 0, variacao: "0%" },
+          mtmoTotal: { valor: "700", variacao: "+50%" },
+          canaisAtivos: { valor: 5, variacao: "+25%" },
+        },
+      };
+
+      function testRenderMetrics() {
+        console.log("Testando renderização de métricas...");
+
+        const elements = [
+          "metricContas",
+          "metricErros",
+          "metricMtmo",
+          "metricCanais",
+        ];
+        const values = [
+          testData.metricas.totalContas.valor,
+          testData.metricas.errosDoMes.valor,
+          testData.metricas.mtmoTotal.valor,
+          testData.metricas.canaisAtivos.valor,
+        ];
+
+        elements.forEach((elementId, index) => {
+          const element = document.getElementById(elementId);
+          if (element) {
+            element.textContent = values[index];
+            console.log(`✅ ${elementId}: ${values[index]}`);
+          } else {
+            console.error(`❌ Elemento ${elementId} não encontrado`);
+          }
+        });
+      }
+
+      function testRenderAccounts() {
+        console.log("Testando renderização de contas...");
+
+        const accountsTree = document.getElementById("accountsTree");
+        if (accountsTree) {
+          let html = "<ul>";
+          testData.contas.forEach((conta) => {
+            html += `<li><strong>${conta.nome}</strong> (${conta.tipo} - ${conta.status})</li>`;
+          });
+          html += "</ul>";
+          accountsTree.innerHTML = html;
+          console.log("✅ Árvore de contas renderizada");
+        } else {
+          console.error("❌ Elemento accountsTree não encontrado");
+        }
+      }
+
+      function testRenderRanking() {
+        console.log("Testando renderização de ranking...");
+
+        const tbody = document.getElementById("rankingTableBody");
+        if (tbody) {
+          let html = "";
+          testData.contas.forEach((conta) => {
+            html += `
+                        <tr>
+                            <td>${conta.nome}</td>
+                            <td>${conta.tipo}</td>
+                            <td>${conta.status}</td>
+                            <td>${conta.contatos}</td>
+                        </tr>
+                    `;
+          });
+          tbody.innerHTML = html;
+          console.log("✅ Tabela de ranking renderizada");
+        } else {
+          console.error("❌ Elemento rankingTableBody não encontrado");
+        }
+      }
+
+      // Executar testes
+      window.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM carregado, executando testes...");
+
+        setTimeout(() => {
+          testRenderMetrics();
+          testRenderAccounts();
+          testRenderRanking();
+          console.log("=== TESTES CONCLUÍDOS ===");
+        }, 100);
+      });
+    </script>
+  </body>
+</html>

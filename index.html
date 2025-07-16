@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Contas</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="app-title">Dashboard de Contas</h1>
+            </div>
+            <div class="header-center">
+                <div class="period-filter">
+                    <select class="form-control" id="periodFilter">
+                        <option value="1_mes" selected>1 Mês</option>
+                        <option value="3_meses">3 Meses</option>
+                        <option value="6_meses">6 Meses</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                    <button class="btn btn--primary" id="applyFilter">Aplicar</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="mode-toggle">
+                    <button class="btn btn--sm btn--outline mode-btn active" data-mode="admin">Admin</button>
+                    <button class="btn btn--sm btn--outline mode-btn" data-mode="master">Master</button>
+                </div>
+                <button class="header-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-btn" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <input type="text" class="form-control" id="searchAccounts" placeholder="Buscar contas...">
+            <div class="sidebar-controls">
+                <button class="btn btn--sm btn--secondary" id="expandAll">
+                    <i class="fas fa-expand"></i> Expandir Tudo
+                </button>
+                <button class="btn btn--sm btn--secondary" id="collapseAll">
+                    <i class="fas fa-compress"></i> Recolher Tudo
+                </button>
+            </div>
+        </div>
+        <div class="sidebar-content">
+            <div class="accounts-tree" id="accountsTree">
+                <!-- Árvore de contas será inserida aqui -->
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div class="page" id="dashboardPage">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+            </div>
+
+            <!-- Metrics Cards -->
+            <div class="metrics-grid">
+                <div class="card metric-card">
+                    <div class="card__body">
+                        <div class="metric-header">
+                            <h3>Total de Contas</h3>
+                            <i class="fas fa-users metric-icon"></i>
+                        </div>
+                        <div class="metric-value">
+                            <span class="metric-number" id="metricContas">10</span>
+                            <span class="metric-change positive" id="metricContasChange">+2%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="card__body">
+                        <div class="metric-header">
+                            <h3>Erros do Mês</h3>
+                            <i class="fas fa-exclamation-triangle metric-icon"></i>
+                        </div>
+                        <div class="metric-value">
+                            <span class="metric-number" id="metricErros">120</span>
+                            <span class="metric-change negative" id="metricErrosChange">-5%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="card__body">
+                        <div class="metric-header">
+                            <h3>MTMO Total</h3>
+                            <i class="fas fa-chart-line metric-icon"></i>
+                        </div>
+                        <div class="metric-value">
+                            <span class="metric-number" id="metricMtmo">12.3K</span>
+                            <span class="metric-change positive" id="metricMtmoChange">+10%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="card__body">
+                        <div class="metric-header">
+                            <h3>Canais Ativos</h3>
+                            <i class="fas fa-plug metric-icon"></i>
+                        </div>
+                        <div class="metric-value">
+                            <span class="metric-number" id="metricCanais">22</span>
+                            <span class="metric-change neutral">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <div class="chart-header">
+                            <h3>Erros MT/MO por Dia</h3>
+                            <select class="form-control chart-filter" id="chartCompanyFilter">
+                                <option value="">Todas as empresas</option>
+                            </select>
+                        </div>
+                        <canvas id="errorsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <h3>Contas Ativas por Canal</h3>
+                        <canvas id="channelsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Table -->
+            <div class="card">
+                <div class="card__body">
+                    <div class="table-header">
+                        <h3>Ranking de Contas</h3>
+                        <div class="table-controls">
+                            <input type="text" class="form-control" id="searchRanking" placeholder="Buscar contas...">
+                            <select class="form-control" id="filterType">
+                                <option value="">Todos os tipos</option>
+                                <option value="Enterprise">Enterprise</option>
+                                <option value="Department">Department</option>
+                                <option value="Team">Team</option>
+                                <option value="Startup">Startup</option>
+                                <option value="Individual">Individual</option>
+                            </select>
+                            <select class="form-control" id="filterStatus">
+                                <option value="">Todos os status</option>
+                                <option value="Active">Ativo</option>
+                                <option value="Trial">Trial</option>
+                                <option value="Suspended">Suspenso</option>
+                                <option value="Limited">Limitado</option>
+                            </select>
+                            <button class="btn btn--secondary" id="exportRanking">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="rankingTable">
+                            <thead>
+                                <tr>
+                                    <th>Conta</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                    <th>Contatos</th>
+                                    <th>MTMO</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rankingTableBody">
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="rankingPagination">
+                        <!-- Paginação será inserida aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Errors Table -->
+            <div class="card">
+                <div class="card__body">
+                    <div class="table-header">
+                        <h3>Erros de API por Endpoint</h3>
+                        <div class="table-controls">
+                            <select class="form-control" id="filterErrorType">
+                                <option value="">Todos os tipos</option>
+                                <option value="timeout">Timeout</option>
+                                <option value="payload">Payload</option>
+                                <option value="autenticacao">Autenticação</option>
+                            </select>
+                            <select class="form-control" id="filterErrorStatus">
+                                <option value="">Todos os status</option>
+                                <option value="normal">Normal</option>
+                                <option value="warning">Warning</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="apiErrorsTable">
+                            <thead>
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                    <th>Quantidade</th>
+                                    <th>Último Erro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apiErrorsTableBody">
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Logs -->
+            <div class="card">
+                <div class="card__body">
+                    <div class="table-header">
+                        <h3>Pesquisa de Logs</h3>
+                        <div class="table-controls">
+                            <select class="form-control" id="filterLogType">
+                                <option value="">Todos os tipos</option>
+                                <option value="incoming">Entrada</option>
+                                <option value="outgoing">Saída</option>
+                            </select>
+                            <select class="form-control" id="filterLogChannel">
+                                <option value="">Todos os canais</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Telegram">Telegram</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="logsTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Tipo</th>
+                                    <th>Canal</th>
+                                    <th>Cliente ID</th>
+                                    <th>Conta</th>
+                                    <th>Mensagem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="card">
+                <div class="card__body">
+                    <h3>Atividades Recentes</h3>
+                    <div class="timeline" id="recentActivities">
+                        <!-- Atividades serão inseridas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Detail Page -->
+        <div class="page hidden" id="accountDetailPage">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <button class="btn btn--sm btn--secondary" id="backToDashboard">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                    </button>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current" id="accountBreadcrumb">Detalhes da Conta</span>
+                </div>
+                <div class="action-bar">
+                    <button class="btn btn--primary" id="generateReport">
+                        <i class="fas fa-file-alt"></i> Gerar Relatório
+                    </button>
+                    <button class="btn btn--secondary" id="createUser">
+                        <i class="fas fa-user-plus"></i> Criar Usuário
+                    </button>
+                    <button class="btn btn--secondary" id="createSubaccount">
+                        <i class="fas fa-plus"></i> Criar Subconta
+                    </button>
+                </div>
+            </div>
+
+            <div class="account-detail-grid">
+                <!-- Account Info -->
+                <div class="account-info">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Informações Principais</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Nome da Empresa</label>
+                                    <span id="detailAccountName">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>ID da Empresa</label>
+                                    <span id="detailAccountId">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Status</label>
+                                    <span class="status" id="detailAccountStatus">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Usuários (Online/Total)</label>
+                                    <span id="detailUsers">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Conversas Abertas</label>
+                                    <span id="detailConversations">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Bulks Realizados</label>
+                                    <span id="detailBulks">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Bulk Restantes</label>
+                                    <span id="detailBulkRemaining">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Mensagens Enviadas</label>
+                                    <span id="detailMessagesSent">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Editar Conta</h3>
+                            <form id="editAccountForm">
+                                <div class="form-group">
+                                    <label class="form-label">Nome da Empresa</label>
+                                    <input type="text" class="form-control" id="editName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">ID da Empresa</label>
+                                    <input type="text" class="form-control" id="editId" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-control" id="editStatus">
+                                        <option value="Active">Ativo</option>
+                                        <option value="Suspended">Suspenso</option>
+                                        <option value="Trial">Trial</option>
+                                        <option value="Limited">Limitado</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Salvar Alterações</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channels Integration -->
+                <div class="channels-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Canais de Integração</h3>
+                            <div class="channels-grid" id="channelsGrid">
+                                <!-- Canais serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Management -->
+                <div class="users-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="section-header">
+                                <h3>Gestão de Usuários</h3>
+                                <button class="btn btn--primary" id="openUserModal">
+                                    <i class="fas fa-user-plus"></i> Adicionar Usuário
+                                </button>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Email</th>
+                                            <th>Cargo</th>
+                                            <th>Último Login</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Usuários serão inseridos aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subaccounts -->
+                <div class="subaccounts-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="section-header">
+                                <h3>Subcontas</h3>
+                                <button class="btn btn--primary" id="openSubaccountModal">
+                                    <i class="fas fa-plus"></i> Criar Subconta
+                                </button>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="subaccountsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Tipo</th>
+                                            <th>Status</th>
+                                            <th>Contatos</th>
+                                            <th>MTMO</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="subaccountsTableBody">
+                                        <!-- Subcontas serão inseridas aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Timeline -->
+                <div class="account-timeline">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Atividades da Conta</h3>
+                            <div class="timeline" id="accountTimeline">
+                                <!-- Atividades serão inseridas aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subaccount Detail Page -->
+        <div class="page hidden" id="subaccountDetailPage">
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <button class="btn btn--sm btn--secondary" id="backToAccount">
+                        <i class="fas fa-arrow-left"></i> Voltar à Conta
+                    </button>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current" id="subaccountBreadcrumb">Detalhes da Subconta</span>
+                </div>
+            </div>
+
+            <div class="subaccount-detail-grid">
+                <!-- Subaccount Info -->
+                <div class="subaccount-info">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Informações da Subconta</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Nome</label>
+                                    <span id="subaccountName">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Tipo</label>
+                                    <span id="subaccountType">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Status</label>
+                                    <span id="subaccountStatus">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Contatos</label>
+                                    <span id="subaccountContacts">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>MTMO</label>
+                                    <span id="subaccountMtmo">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subaccount Channels -->
+                <div class="subaccount-channels">
+                    <div class="card">
+                        <div class="card__body">
+                            <h3>Canais de Integração</h3>
+                            <div class="channels-grid" id="subaccountChannelsGrid">
+                                <!-- Canais da subconta serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalOverlay">
+        <!-- Create User Modal -->
+        <div class="modal" id="createUserModal">
+            <div class="modal-header">
+                <h3>Criar Usuário</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cargo</label>
+                        <select class="form-control" id="userRole">
+                            <option value="Admin">Admin</option>
+                            <option value="Manager">Manager</option>
+                            <option value="User">Usuário</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn--secondary" id="cancelModal">Cancelar</button>
+                        <button type="submit" class="btn btn--primary">Criar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Subaccount Modal -->
+        <div class="modal hidden" id="createSubaccountModal">
+            <div class="modal-header">
+                <h3>Criar Subconta</h3>
+                <button class="modal-close" id="closeSubaccountModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createSubaccountForm">
+                    <div class="form-group">
+                        <label class="form-label">Nome da Subconta</label>
+                        <input type="text" class="form-control" id="subaccountNameInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-control" id="subaccountTypeInput">
+                            <option value="Department">Department</option>
+                            <option value="Team">Team</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn--secondary" id="cancelSubaccountModal">Cancelar</button>
+                        <button type="submit" class="btn btn--primary">Criar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>Notificações</h3>
+            <button class="btn btn--sm btn--secondary" id="markAllRead">Marcar todas como lidas</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notificações serão inseridas aqui -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
