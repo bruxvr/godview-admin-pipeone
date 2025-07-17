@@ -1091,16 +1091,19 @@ const components = {
     row.className = level > 0 ? "subaccount-row" : "company-row";
     row.setAttribute("data-level", level);
 
-    // Gerar ícones de canais
+    // Gerar ícones de canais com status de integração
     const channelIcons = account.canais
       ? Object.entries(account.canais)
-          .filter(([_, status]) => status === "conectado")
-          .map(([channel, _]) => {
-            return `<div class="channel-icon ${channel}" title="${utils.getChannelName(
-              channel
-            )}">
-                  <i class="${utils.getChannelIcon(channel)}"></i>
-                </div>`;
+          .map(([channel, status]) => {
+            const isIntegrated = status === "conectado";
+            const integrationClass = isIntegrated ? "integrated" : "not-integrated";
+            return `<div class="channel-icon ${channel} ${integrationClass}" 
+                          title="${utils.getChannelName(channel)} - ${isIntegrated ? 'Integrado' : 'Clique para integrar'}"
+                          data-channel="${channel}"
+                          data-company-id="${account.id}"
+                          data-integrated="${isIntegrated}">
+                      <i class="${utils.getChannelIcon(channel)}"></i>
+                    </div>`;
           })
           .join("")
       : "";
@@ -1168,9 +1171,6 @@ const components = {
         </div>
       </td>
       <td>
-        <span class="last-activity">1 semanas atrás</span>
-      </td>
-      <td>
         <div class="action-buttons">
           <button class="btn btn--sm btn--primary action-btn" data-company-id="${
             account.id
@@ -1223,7 +1223,64 @@ const components = {
       });
     }
 
+    // Adicionar event listeners para os ícones de canal
+    const channelIconElements = row.querySelectorAll('.channel-icon');
+    channelIconElements.forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const channel = icon.dataset.channel;
+        const companyId = icon.dataset.companyId;
+        const isIntegrated = icon.dataset.integrated === 'true';
+        
+        if (!isIntegrated) {
+          this.integrateChannel(companyId, channel, icon);
+        }
+      });
+    });
+
     tbody.appendChild(row);
+  },
+
+  integrateChannel(companyId, channel, iconElement) {
+    // Simular integração
+    const channelName = utils.getChannelName(channel);
+    
+    if (confirm(`Deseja integrar ${channelName} para esta empresa?`)) {
+      // Atualizar visualmente o ícone
+      iconElement.classList.remove('not-integrated');
+      iconElement.classList.add('integrated');
+      iconElement.dataset.integrated = 'true';
+      iconElement.title = `${channelName} - Integrado`;
+      
+      // Atualizar os dados (em uma aplicação real, isso seria uma chamada API)
+      const company = utils.findAccountById(appData.contas, parseInt(companyId));
+      if (company && company.canais) {
+        company.canais[channel] = 'conectado';
+      }
+      
+      // Mostrar feedback
+      this.showNotification(`${channelName} integrado com sucesso!`, 'success');
+    }
+  },
+
+  showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `notification-toast ${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+      <span>${message}</span>
+    `;
+    
+    // Adicionar ao body
+    document.body.appendChild(notification);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
   },
 
   toggleCompanyNode(companyId) {
@@ -1999,6 +2056,16 @@ const components = {
     console.log(
       `Restrições aplicadas para o modo: ${appState.mode.toUpperCase()}`
     );
+
+    // Mostrar notificação informativa sobre o modo atual
+    if (appState.mode === "admin") {
+      setTimeout(() => {
+        utils.showNotification(
+          "Modo ADMIN ativo: Alguns painéis estão restritos. Mude para MASTER para acesso completo.",
+          "info"
+        );
+      }, 1000);
+    }
   },
 };
 
@@ -2063,6 +2130,10 @@ function setupEventListeners() {
         e.stopPropagation();
         appState.mode = btn.dataset.mode;
         components.updateUI();
+        utils.showNotification(
+          `Modo ${appState.mode.toUpperCase()} ativado`,
+          "info"
+        );
       });
       console.log(`✅ Mode button ${index + 1} configurado`);
     }
