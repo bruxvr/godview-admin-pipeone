@@ -436,6 +436,8 @@ let appState = {
     errorStatus: "",
     logType: "",
     logChannel: "",
+    logSearchId: "",
+    logDate: "",
   },
   sortBy: "nome",
   sortDirection: "asc",
@@ -1282,10 +1284,29 @@ const components = {
 
     let logs = [...appData.logs];
 
+    // Filtro por ID
+    if (appState.filters.logSearchId) {
+      logs = logs.filter((log) => 
+        log.clienteId.toLowerCase().includes(appState.filters.logSearchId.toLowerCase()) ||
+        log.conta.toLowerCase().includes(appState.filters.logSearchId.toLowerCase())
+      );
+    }
+
+    // Filtro por data
+    if (appState.filters.logDate) {
+      const filterDate = new Date(appState.filters.logDate);
+      logs = logs.filter((log) => {
+        const logDate = new Date(log.timestamp);
+        return logDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    // Filtro por tipo
     if (appState.filters.logType) {
       logs = logs.filter((log) => log.tipo === appState.filters.logType);
     }
 
+    // Filtro por canal
     if (appState.filters.logChannel) {
       logs = logs.filter((log) => log.canal === appState.filters.logChannel);
     }
@@ -2165,6 +2186,16 @@ function setupEventListeners() {
     });
 
   // Filtros de logs
+  document.getElementById("searchLogsById").addEventListener("input", (e) => {
+    appState.filters.logSearchId = e.target.value;
+    components.renderLogsTable();
+  });
+
+  document.getElementById("filterLogDate").addEventListener("change", (e) => {
+    appState.filters.logDate = e.target.value;
+    components.renderLogsTable();
+  });
+
   document.getElementById("filterLogType").addEventListener("change", (e) => {
     appState.filters.logType = e.target.value;
     components.renderLogsTable();
@@ -2189,6 +2220,45 @@ function setupEventListeners() {
     }));
     utils.exportToCSV(csvData, "ranking_contas.csv");
     utils.showNotification("Ranking exportado com sucesso!", "success");
+  });
+
+  document.getElementById("exportLogs").addEventListener("click", () => {
+    let logs = [...appData.logs];
+    
+    // Aplicar os mesmos filtros da tabela
+    if (appState.filters.logSearchId) {
+      logs = logs.filter((log) => 
+        log.clienteId.toLowerCase().includes(appState.filters.logSearchId.toLowerCase()) ||
+        log.conta.toLowerCase().includes(appState.filters.logSearchId.toLowerCase())
+      );
+    }
+    
+    if (appState.filters.logDate) {
+      const filterDate = new Date(appState.filters.logDate);
+      logs = logs.filter((log) => {
+        const logDate = new Date(log.timestamp);
+        return logDate.toDateString() === filterDate.toDateString();
+      });
+    }
+    
+    if (appState.filters.logType) {
+      logs = logs.filter((log) => log.tipo === appState.filters.logType);
+    }
+    
+    if (appState.filters.logChannel) {
+      logs = logs.filter((log) => log.canal === appState.filters.logChannel);
+    }
+
+    const csvData = logs.map((log) => ({
+      Timestamp: utils.formatDateTime(log.timestamp),
+      Tipo: log.tipo === "incoming" ? "Entrada" : "Saída",
+      Canal: log.canal,
+      "Cliente ID": log.clienteId,
+      Conta: log.conta,
+      Mensagem: log.mensagem,
+    }));
+    utils.exportToCSV(csvData, "logs_pesquisa.csv");
+    utils.showNotification("Logs exportados com sucesso!", "success");
   });
 
   // Navegação

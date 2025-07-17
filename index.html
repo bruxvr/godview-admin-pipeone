@@ -330,6 +330,18 @@
             <div class="table-header">
               <h3>Pesquisa de Logs</h3>
               <div class="table-controls">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchLogsById"
+                  placeholder="🔍 Buscar por ID..."
+                />
+                <input
+                  type="date"
+                  class="form-control"
+                  id="filterLogDate"
+                  title="Filtrar por data"
+                />
                 <select class="form-control" id="filterLogType">
                   <option value="">📝 Tipos</option>
                   <option value="incoming">📥 Entrada</option>
@@ -341,6 +353,9 @@
                   <option value="Instagram">📸 Instagram</option>
                   <option value="Telegram">✈️ Telegram</option>
                 </select>
+                <button class="btn btn--secondary" id="exportLogs">
+                  <i class="fas fa-download"></i> Exportar
+                </button>
               </div>
             </div>
             <div class="table-container">
