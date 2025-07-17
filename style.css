@@ -1045,27 +1045,128 @@ select.form-control {
   height: 300px !important;
 }
 
-/* Table Styles */
+/* Table Styles - Inline Filters */
 .table-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-20);
-  flex-wrap: wrap;
+  padding: var(--space-16);
+  background: var(--color-background);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border);
+  flex-wrap: nowrap;
   gap: var(--space-16);
+  position: relative;
+  overflow: visible;
+  min-height: 60px;
+}
+
+.table-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-success) 100%);
+}
+
+.table-controls {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  overflow: visible;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.table-controls .form-control {
+  min-width: 100px;
+  max-width: 140px;
+  font-size: var(--font-size-sm);
+  height: 36px;
+  flex-shrink: 1;
+}
+
+.table-controls .btn {
+  height: 36px;
+  padding: var(--space-8) var(--space-10);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+
+
+/* Button styling in table controls */
+.table-controls .btn--secondary {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.table-controls .btn--secondary:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.table-controls .btn--primary {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: white;
+}
+
+.table-controls .btn--primary:hover {
+  background: var(--color-primary-dark, #0056b3);
+  border-color: var(--color-primary-dark, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.3);
 }
 
 .table-header h3 {
   margin: 0;
   font-size: var(--font-size-lg);
   color: var(--color-text);
+  flex-shrink: 0;
+  min-width: 150px;
 }
 
-.table-controls {
-  display: flex;
-  gap: var(--space-12);
-  align-items: center;
-  flex-wrap: wrap;
+/* Responsividade para filtros inline */
+@media (max-width: 1200px) {
+  .table-header {
+    flex-wrap: wrap;
+  }
+  
+  .table-controls {
+    flex-wrap: wrap;
+    order: 2;
+    width: 100%;
+    margin-top: var(--space-8);
+  }
+  
+  .table-header h3 {
+    order: 1;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-controls .form-control {
+    min-width: 100px;
+    max-width: 140px;
+  }
+  
+  .table-controls .btn {
+    padding: var(--space-6) var(--space-10);
+    font-size: 12px;
+  }
 }
 
 .table-container {
