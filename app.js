@@ -22,6 +22,19 @@ const appData = {
           status: "Active",
           contatos: 5200,
           mtmo: 1200,
+          usuarios: 8,
+          usuariosOnline: 5,
+          conversasAbertas: 89,
+          bulksRealizados: 15,
+          mensagensEnviadas: 4200,
+          canais: {
+            whatsapp: "conectado",
+            instagram: "desconectado",
+            messenger: "conectado",
+            gmail: "conectado",
+            telegram: "desconectado",
+            api: "conectado",
+          },
         },
         {
           id: 12,
@@ -30,6 +43,19 @@ const appData = {
           status: "Active",
           contatos: 4800,
           mtmo: 980,
+          usuarios: 6,
+          usuariosOnline: 4,
+          conversasAbertas: 67,
+          bulksRealizados: 12,
+          mensagensEnviadas: 3800,
+          canais: {
+            whatsapp: "conectado",
+            instagram: "conectado",
+            messenger: "desconectado",
+            gmail: "conectado",
+            telegram: "conectado",
+            api: "desconectado",
+          },
         },
       ],
       canais: {
@@ -190,6 +216,19 @@ const appData = {
           status: "Active",
           contatos: 4200,
           mtmo: 980,
+          usuarios: 6,
+          usuariosOnline: 4,
+          conversasAbertas: 89,
+          bulksRealizados: 15,
+          mensagensEnviadas: 4560,
+          canais: {
+            whatsapp: "conectado",
+            instagram: "conectado",
+            messenger: "conectado",
+            gmail: "conectado",
+            telegram: "desconectado",
+            api: "conectado",
+          },
         },
         {
           id: 52,
@@ -198,6 +237,40 @@ const appData = {
           status: "Active",
           contatos: 3800,
           mtmo: 850,
+          usuarios: 5,
+          usuariosOnline: 3,
+          conversasAbertas: 67,
+          bulksRealizados: 12,
+          mensagensEnviadas: 3890,
+          canais: {
+            whatsapp: "conectado",
+            instagram: "conectado",
+            messenger: "desconectado",
+            gmail: "conectado",
+            telegram: "conectado",
+            api: "conectado",
+          },
+        },
+        {
+          id: 53,
+          nome: "Marketing Digital",
+          tipo: "Department",
+          status: "Active",
+          contatos: 4500,
+          mtmo: 1060,
+          usuarios: 4,
+          usuariosOnline: 2,
+          conversasAbertas: 42,
+          bulksRealizados: 7,
+          mensagensEnviadas: 2750,
+          canais: {
+            whatsapp: "conectado",
+            instagram: "conectado",
+            messenger: "conectado",
+            gmail: "desconectado",
+            telegram: "conectado",
+            api: "conectado",
+          },
         },
       ],
       canais: {
@@ -298,6 +371,30 @@ const appData = {
     },
   ],
   atividades: [
+    {
+      timestamp: "2025-07-17 10:30",
+      tipo: "sistema",
+      descricao: "Sistema atualizado para versão 2.1.0",
+      conta: "Sistema",
+    },
+    {
+      timestamp: "2025-07-17 09:15",
+      tipo: "bulk",
+      descricao: "Bulk de 1.200 mensagens realizado com sucesso",
+      conta: "Cantina do Marcio",
+    },
+    {
+      timestamp: "2025-07-17 08:45",
+      tipo: "login",
+      descricao: "Usuário Maria Santos fez login",
+      conta: "Tech Solutions",
+    },
+    {
+      timestamp: "2025-07-16 17:30",
+      tipo: "integracao",
+      descricao: "Instagram conectado com sucesso",
+      conta: "Restaurante Saboroso",
+    },
     {
       timestamp: "2025-07-15 16:00",
       tipo: "login",
@@ -931,6 +1028,207 @@ const components = {
     this.renderPagination(accounts.length, "rankingPagination");
   },
 
+  renderCompaniesTable() {
+    const tbody = document.getElementById("companiesTableBody");
+    if (!tbody) {
+      console.error("Elemento companiesTableBody não encontrado");
+      return;
+    }
+
+    let companies = [...appData.contas];
+
+    // Aplicar filtros
+    if (appState.filters.searchTerm) {
+      companies = companies.filter(
+        (company) =>
+          company.nome
+            .toLowerCase()
+            .includes(appState.filters.searchTerm.toLowerCase()) ||
+          (company.subcontas &&
+            company.subcontas.some((sub) =>
+              sub.nome
+                .toLowerCase()
+                .includes(appState.filters.searchTerm.toLowerCase())
+            ))
+      );
+    }
+
+    if (appState.filters.status) {
+      companies = companies.filter((company) => {
+        const status = company.status === "Active" ? "ATIVO" : "INATIVO";
+        return status === appState.filters.status;
+      });
+    }
+
+    tbody.innerHTML = "";
+
+    companies.forEach((company) => {
+      // Renderizar empresa principal
+      this.renderCompanyRow(tbody, company, 0);
+
+      // Renderizar subcontas se existirem e se a empresa estiver expandida
+      if (company.subcontas && company.subcontas.length > 0) {
+        const isExpanded = appState.expandedNodes.has(company.id);
+        if (isExpanded) {
+          company.subcontas.forEach((subaccount) => {
+            this.renderCompanyRow(tbody, subaccount, 1, company.id);
+          });
+        }
+      }
+    });
+
+    this.renderPagination(companies.length, "companiesPagination");
+  },
+
+  renderCompanyRow(tbody, account, level = 0, parentId = null) {
+    const row = document.createElement("tr");
+    row.className = level > 0 ? "subaccount-row" : "company-row";
+    row.setAttribute("data-level", level);
+
+    // Gerar ícones de canais
+    const channelIcons = account.canais
+      ? Object.entries(account.canais)
+          .filter(([_, status]) => status === "conectado")
+          .map(([channel, _]) => {
+            return `<div class="channel-icon ${channel}" title="${utils.getChannelName(
+              channel
+            )}">
+                  <i class="${utils.getChannelIcon(channel)}"></i>
+                </div>`;
+          })
+          .join("")
+      : "";
+
+    // Determinar se tem subcontas (apenas para empresas principais)
+    const hasSubaccounts =
+      level === 0 && account.subcontas && account.subcontas.length > 0;
+    const isExpanded = hasSubaccounts && appState.expandedNodes.has(account.id);
+
+    // Calcular indentação
+    const indentStyle = `padding-left: ${level * 30 + 12}px`;
+
+    row.innerHTML = `
+      <td>
+        <input type="checkbox" class="company-checkbox" data-company-id="${
+          account.id
+        }" />
+      </td>
+      <td>
+        <div class="company-name-cell" style="${indentStyle}">
+          ${
+            hasSubaccounts
+              ? `<button class="tree-toggle" data-company-id="${account.id}">
+               <i class="fas fa-chevron-${isExpanded ? "down" : "right"}"></i>
+             </button>`
+              : '<span class="tree-spacer"></span>'
+          }
+          <i class="fas ${utils.getTypeIcon(account.tipo)} company-icon"></i>
+          <span class="company-name">${account.nome}</span>
+          ${level > 0 ? '<span class="subaccount-badge">Subconta</span>' : ""}
+        </div>
+      </td>
+      <td><code>${account.id || `SUB${account.id}`}</code></td>
+      <td>
+        <span class="status status--${
+          account.status === "Active" ? "success" : "error"
+        }">
+          ${account.status === "Active" ? "ATIVO" : "INATIVO"}
+        </span>
+      </td>
+      <td>${account.usuarios || account.usuariosOnline || "-"}</td>
+      <td>
+        <div class="channel-icons">
+          ${channelIcons}
+        </div>
+      </td>
+      <td>
+        <div class="activity-info">
+          <div class="activity-stats">
+            <div class="activity-item">
+              <i class="fas fa-comments"></i>
+              <span>${account.conversasAbertas || 0} conversas</span>
+            </div>
+            <div class="activity-item">
+              <i class="fas fa-paper-plane"></i>
+              <span>${account.bulksRealizados || 0} bulks</span>
+            </div>
+            <div class="activity-item">
+              <i class="fas fa-envelope"></i>
+              <span>${utils.formatNumber(
+                account.mensagensEnviadas || account.mtmo || 0
+              )} msgs</span>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="last-activity">1 semanas atrás</span>
+      </td>
+      <td>
+        <div class="action-buttons">
+          <button class="btn btn--sm btn--primary action-btn" data-company-id="${
+            account.id
+          }" data-level="${level}" title="Ver detalhes">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="btn btn--sm btn--secondary action-btn" title="Configurações">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button class="btn btn--sm btn--outline action-btn" title="Mais opções">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+        </div>
+      </td>
+    `;
+
+    // Adicionar event listeners
+    const toggleBtn = row.querySelector(".tree-toggle");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleCompanyNode(account.id);
+      });
+    }
+
+    const detailsBtn = row.querySelector("[data-company-id]");
+    if (detailsBtn) {
+      detailsBtn.addEventListener("click", () => {
+        if (level === 0) {
+          // Empresa principal
+          const accountToSelect = utils.findAccountById(
+            appData.contas,
+            account.id
+          );
+          if (accountToSelect) {
+            this.selectAccount(accountToSelect);
+          }
+        } else {
+          // Subconta
+          const parentAccount = utils.findAccountById(appData.contas, parentId);
+          const subaccount = parentAccount?.subcontas?.find(
+            (sub) => sub.id === account.id
+          );
+          if (parentAccount && subaccount) {
+            appState.selectedAccount = parentAccount;
+            this.selectSubaccount(subaccount);
+          }
+        }
+      });
+    }
+
+    tbody.appendChild(row);
+  },
+
+  toggleCompanyNode(companyId) {
+    if (appState.expandedNodes.has(companyId)) {
+      appState.expandedNodes.delete(companyId);
+    } else {
+      appState.expandedNodes.add(companyId);
+    }
+    this.renderCompaniesTable();
+  },
+
   renderApiErrorsTable() {
     const tbody = document.getElementById("apiErrorsTableBody");
     if (!tbody) return;
@@ -1062,10 +1360,26 @@ const components = {
   },
 
   renderRecentActivities() {
+    console.log("Renderizando atividades recentes...");
     const container = document.getElementById("recentActivities");
-    if (!container) return;
+    if (!container) {
+      console.error("Container recentActivities não encontrado!");
+      return;
+    }
 
+    console.log("Container encontrado, atividades:", appData.atividades);
     container.innerHTML = "";
+
+    if (!appData.atividades || appData.atividades.length === 0) {
+      container.innerHTML = `
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <p class="timeline-description">Nenhuma atividade recente encontrada.</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
 
     appData.atividades.forEach((activity) => {
       const item = document.createElement("div");
@@ -1076,10 +1390,13 @@ const components = {
             activity.timestamp
           )}</div>
           <p class="timeline-description">${activity.descricao}</p>
+          <small class="timeline-account">Conta: ${activity.conta}</small>
         </div>
       `;
       container.appendChild(item);
     });
+
+    console.log("Atividades renderizadas com sucesso!");
   },
 
   renderAccountDetail() {
@@ -1470,6 +1787,7 @@ const components = {
       console.log("Renderizando dashboard...");
       this.renderMetrics();
       this.renderCharts();
+      this.renderCompaniesTable();
       this.renderRankingTable();
 
       // Restringir acesso baseado no modo
@@ -1481,7 +1799,10 @@ const components = {
         this.hideRestrictedPanels();
       }
 
-      this.renderRecentActivities();
+      // Renderizar atividades recentes com delay para garantir DOM
+      setTimeout(() => {
+        this.renderRecentActivities();
+      }, 100);
     } else if (appState.currentPage === "accountDetail") {
       this.renderAccountDetail();
     } else if (appState.currentPage === "subaccountDetail") {
@@ -1722,6 +2043,56 @@ function setupEventListeners() {
     appState.currentPageNum = 1;
     components.renderRankingTable();
   });
+
+  // Filtros da tabela de empresas
+  const searchCompanies = document.getElementById("searchCompanies");
+  if (searchCompanies) {
+    searchCompanies.addEventListener("input", (e) => {
+      appState.filters.searchTerm = e.target.value;
+      appState.currentPageNum = 1;
+      components.renderCompaniesTable();
+    });
+  }
+
+  const filterCompanyStatus = document.getElementById("filterCompanyStatus");
+  if (filterCompanyStatus) {
+    filterCompanyStatus.addEventListener("change", (e) => {
+      appState.filters.status = e.target.value;
+      appState.currentPageNum = 1;
+      components.renderCompaniesTable();
+    });
+  }
+
+  // Exportar empresas
+  const exportCompanies = document.getElementById("exportCompanies");
+  if (exportCompanies) {
+    exportCompanies.addEventListener("click", () => {
+      const companies = appData.contas.map((company) => ({
+        Nome: company.nome,
+        ID: company.id,
+        Status: company.status === "Active" ? "ATIVO" : "INATIVO",
+        Usuarios: company.usuarios,
+        Contatos: company.contatos,
+        MTMO: company.mtmo,
+      }));
+      utils.exportToCSV(companies, "empresas.csv");
+      utils.showNotification(
+        "Dados das empresas exportados com sucesso!",
+        "success"
+      );
+    });
+  }
+
+  // Selecionar todas as empresas
+  const selectAllCompanies = document.getElementById("selectAllCompanies");
+  if (selectAllCompanies) {
+    selectAllCompanies.addEventListener("change", (e) => {
+      const checkboxes = document.querySelectorAll(".company-checkbox");
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = e.target.checked;
+      });
+    });
+  }
 
   // Filtros de erros de API
   document.getElementById("filterErrorType").addEventListener("change", (e) => {

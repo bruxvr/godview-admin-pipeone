@@ -180,6 +180,56 @@
           </div>
         </div>
 
+        <!-- Companies Overview Table -->
+        <div class="card">
+          <div class="card__body">
+            <div class="table-header">
+              <h3>Informações das Empresas</h3>
+              <div class="table-controls">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchCompanies"
+                  placeholder="Buscar empresas..."
+                />
+                <select class="form-control" id="filterCompanyStatus">
+                  <option value="">Todos os status</option>
+                  <option value="ATIVO">Ativo</option>
+                  <option value="INATIVO">Inativo</option>
+                </select>
+                <button class="btn btn--secondary" id="exportCompanies">
+                  <i class="fas fa-download"></i> Exportar
+                </button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="companiesTable">
+                <thead>
+                  <tr>
+                    <th>
+                      <input type="checkbox" id="selectAllCompanies" />
+                    </th>
+                    <th>Nome</th>
+                    <th>ID da Empresa</th>
+                    <th>Status</th>
+                    <th>Usuários</th>
+                    <th>Canais</th>
+                    <th>Atividade</th>
+                    <th>Última Atividade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="companiesTableBody">
+                  <!-- Dados serão inseridos aqui -->
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination" id="companiesPagination">
+              <!-- Paginação será inserida aqui -->
+            </div>
+          </div>
+        </div>
+
         <!-- Ranking Table -->
         <div class="card">
           <div class="card__body">
@@ -624,7 +674,7 @@
     <!-- Modals -->
     <div class="modal-overlay" id="modalOverlay">
       <!-- Create User Modal -->
-      <div class="modal" id="createUserModal">
+      <div class="modal hidden" id="createUserModal">
         <div class="modal-header">
           <h3>Criar Usuário</h3>
           <button class="modal-close" id="closeModal">
