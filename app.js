@@ -1450,37 +1450,90 @@ const components = {
     container.innerHTML = "";
 
     Object.entries(canais).forEach(([channel, status]) => {
+      const isConnected = status === "conectado";
       const item = document.createElement("div");
-      item.className = "channel-item";
+      item.className = `channel-item ${isConnected ? 'connected' : 'disconnected'}`;
+      
       item.innerHTML = `
-        <div class="channel-icon">
-          <i class="${utils.getChannelIcon(channel)}"></i>
-        </div>
-        <div class="channel-info">
-          <h4>${utils.getChannelName(channel)}</h4>
-          ${
-            status === "conectado"
-              ? '<span class="status status--success">Conectado</span>'
-              : '<button class="btn btn--sm btn--primary channel-connect-btn">Integrar</button>'
-          }
+        <div class="channel-card">
+          <div class="channel-header">
+            <div class="channel-icon-wrapper ${channel}">
+              <i class="${utils.getChannelIcon(channel)}"></i>
+            </div>
+            <div class="channel-status-indicator ${isConnected ? 'active' : 'inactive'}"></div>
+          </div>
+          
+          <div class="channel-content">
+            <h4 class="channel-title">${utils.getChannelName(channel)}</h4>
+            <p class="channel-description">${this.getChannelDescription(channel)}</p>
+          </div>
+          
+          <div class="channel-actions">
+            ${
+              isConnected
+                ? `
+                <div class="connection-status">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Conectado</span>
+                </div>
+                <button class="btn-secondary channel-settings-btn" title="Configurações">
+                  <i class="fas fa-cog"></i>
+                </button>
+                `
+                : `
+                <button class="btn-primary channel-connect-btn">
+                  <i class="fas fa-plug"></i>
+                  Conectar
+                </button>
+                `
+            }
+          </div>
         </div>
       `;
 
-      // Adicionar evento de clique no botão de integrar
+      // Adicionar eventos
       const connectBtn = item.querySelector(".channel-connect-btn");
       if (connectBtn) {
         connectBtn.addEventListener("click", () => {
-          appState.selectedAccount.canais[channel] = "conectado";
-          this.renderChannels(appState.selectedAccount.canais);
+          // Animação de loading
+          connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+          connectBtn.disabled = true;
+          
+          setTimeout(() => {
+            appState.selectedAccount.canais[channel] = "conectado";
+            this.renderChannels(appState.selectedAccount.canais);
+            utils.showNotification(
+              `${utils.getChannelName(channel)} conectado com sucesso!`,
+              "success"
+            );
+          }, 1500);
+        });
+      }
+
+      const settingsBtn = item.querySelector(".channel-settings-btn");
+      if (settingsBtn) {
+        settingsBtn.addEventListener("click", () => {
           utils.showNotification(
-            `${utils.getChannelName(channel)} integrado com sucesso!`,
-            "success"
+            `Configurações do ${utils.getChannelName(channel)}`,
+            "info"
           );
         });
       }
 
       container.appendChild(item);
     });
+  },
+
+  getChannelDescription(channel) {
+    const descriptions = {
+      whatsapp: "Mensagens e chamadas instantâneas",
+      instagram: "Posts, stories e direct messages",
+      messenger: "Chat do Facebook Messenger",
+      gmail: "E-mails e notificações",
+      telegram: "Mensagens seguras e grupos",
+      api: "Integração via API REST"
+    };
+    return descriptions[channel] || "Canal de comunicação";
   },
 
   renderUsersTable(users) {
