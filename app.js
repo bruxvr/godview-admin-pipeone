@@ -1431,14 +1431,25 @@ const components = {
       this.renderMetrics();
       this.renderCharts();
       this.renderRankingTable();
-      this.renderApiErrorsTable();
-      this.renderLogsTable();
+
+      // Restringir acesso baseado no modo
+      if (appState.mode === "master") {
+        this.renderApiErrorsTable();
+        this.renderLogsTable();
+      } else {
+        // Ocultar painéis restritos no modo admin
+        this.hideRestrictedPanels();
+      }
+
       this.renderRecentActivities();
     } else if (appState.currentPage === "accountDetail") {
       this.renderAccountDetail();
     } else if (appState.currentPage === "subaccountDetail") {
       this.renderSubaccountDetail();
     }
+
+    // Aplicar restrições de acesso por modo
+    this.applyModeRestrictions();
 
     // Atualizar tema
     document.body.setAttribute("data-color-scheme", appState.theme);
@@ -1459,6 +1470,94 @@ const components = {
     this.renderNotifications();
 
     console.log("UI atualizada com sucesso");
+  },
+
+  // Ocultar painéis restritos para o modo admin
+  hideRestrictedPanels() {
+    const apiErrorsSection = document
+      .querySelector("#apiErrorsTable")
+      ?.closest(".card");
+    const logsSection = document.querySelector("#logsTable")?.closest(".card");
+
+    if (apiErrorsSection) {
+      apiErrorsSection.style.display = "none";
+    }
+    if (logsSection) {
+      logsSection.style.display = "none";
+    }
+  },
+
+  // Aplicar restrições de acesso baseadas no modo
+  applyModeRestrictions() {
+    const restrictedElements = document.querySelectorAll(
+      "[data-mode-restriction]"
+    );
+    const modeIndicator = document.getElementById("modeIndicator");
+
+    // Atualizar indicador de modo
+    if (modeIndicator) {
+      modeIndicator.className = `mode-indicator ${appState.mode}`;
+      const icon = modeIndicator.querySelector("i");
+      const text = modeIndicator.querySelector("span");
+
+      if (appState.mode === "master") {
+        if (icon) icon.className = "fas fa-crown";
+        if (text) text.textContent = "Modo MASTER";
+        modeIndicator.title = "Acesso completo a todas as funcionalidades";
+      } else {
+        if (icon) icon.className = "fas fa-user-shield";
+        if (text) text.textContent = "Modo ADMIN";
+        modeIndicator.title =
+          "Acesso limitado - alguns painéis requerem modo MASTER";
+      }
+    }
+
+    // Aplicar restrições aos elementos
+    restrictedElements.forEach((element) => {
+      const requiredMode = element.getAttribute("data-mode-restriction");
+
+      if (
+        appState.mode === "master" ||
+        !requiredMode ||
+        requiredMode === appState.mode
+      ) {
+        // Mostrar elemento
+        element.style.display = "block";
+        element.classList.remove("admin-hidden");
+        element.style.pointerEvents = "auto";
+        element.style.opacity = "1";
+      } else {
+        // Ocultar elemento no modo admin
+        element.style.display = "none";
+        element.classList.add("admin-hidden");
+        element.style.pointerEvents = "none";
+        element.style.opacity = "0.5";
+
+        // Adicionar evento de click para mostrar mensagem informativa
+        element.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          utils.showNotification(
+            "Esta funcionalidade está disponível apenas no modo MASTER. Troque para o modo MASTER para acessar.",
+            "warning"
+          );
+        });
+      }
+    });
+
+    console.log(
+      `Restrições aplicadas para o modo: ${appState.mode.toUpperCase()}`
+    );
+
+    // Mostrar notificação informativa sobre o modo atual
+    if (appState.mode === "admin") {
+      setTimeout(() => {
+        utils.showNotification(
+          "Modo ADMIN ativo: Alguns painéis estão restritos. Mude para MASTER para acesso completo.",
+          "info"
+        );
+      }, 1000);
+    }
   },
 };
 
@@ -1862,11 +1961,15 @@ function init() {
   if (typeof Chart !== "undefined") {
     console.log("Chart.js carregado com sucesso");
     components.updateUI();
+    // Garantir que as restrições de modo sejam aplicadas na inicialização
+    components.applyModeRestrictions();
     utils.showNotification("Dashboard carregado com sucesso!", "success");
   } else {
     console.error("Chart.js não foi carregado");
     // Renderizar sem gráficos primeiro
     components.updateUI();
+    // Garantir que as restrições de modo sejam aplicadas na inicialização
+    components.applyModeRestrictions();
 
     // Tentar carregar gráficos após um tempo
     setTimeout(() => {
