@@ -651,7 +651,11 @@ const components = {
         }
         <i class="fas ${utils.getTypeIcon(account.tipo)} tree-icon"></i>
         <span class="tree-label">${account.nome}</span>
-        <span class="account-status ${account.status}">${account.status}</span>
+        <span class="status status--${
+          account.status === "Active" ? "success" : "error"
+        }">
+          ${account.status === "Active" ? "ATIVO" : "INATIVO"}
+        </span>
       `;
 
       itemDiv.addEventListener("click", (e) => {

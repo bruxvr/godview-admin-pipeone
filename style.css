@@ -830,8 +830,9 @@ select.form-control {
   color: var(--color-btn-primary-text);
 }
 
-.tree-item.active .account-status {
+.tree-item.active .status {
   color: var(--color-btn-primary-text);
+  border-color: var(--color-btn-primary-text);
 }
 
 .tree-toggle {
@@ -1784,7 +1785,7 @@ select.form-control {
     width: 95%;
     margin: var(--space-20);
   }
-  
+
   .notification-panel {
     width: 100%;
     right: -100%;
