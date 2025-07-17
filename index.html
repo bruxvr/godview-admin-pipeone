@@ -350,8 +350,8 @@
         </div>
 
         <div class="account-detail-grid">
-          <!-- Account Info -->
-          <div class="account-info">
+          <!-- Account Info and Edit Form Side by Side -->
+          <div class="account-main-info">
             <div class="card">
               <div class="card__body">
                 <h3>Informações Principais</h3>
@@ -391,8 +391,10 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Edit Form -->
+          <!-- Edit Form -->
+          <div class="account-edit-form">
             <div class="card">
               <div class="card__body">
                 <h3>Editar Conta</h3>
@@ -535,8 +537,8 @@
         </div>
 
         <div class="subaccount-detail-grid">
-          <!-- Subaccount Info -->
-          <div class="subaccount-info">
+          <!-- Subaccount Info and Edit Form Side by Side -->
+          <div class="subaccount-main-info">
             <div class="card">
               <div class="card__body">
                 <h3>Informações da Subconta</h3>
@@ -562,6 +564,44 @@
                     <span id="subaccountMtmo">-</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Subaccount Form -->
+          <div class="subaccount-edit-form">
+            <div class="card">
+              <div class="card__body">
+                <h3>Editar Subconta</h3>
+                <form id="editSubaccountForm">
+                  <div class="form-group">
+                    <label class="form-label">Nome da Subconta</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="editSubaccountName"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-control" id="editSubaccountType">
+                      <option value="Department">Department</option>
+                      <option value="Team">Team</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="editSubaccountStatus">
+                      <option value="Active">Ativo</option>
+                      <option value="Suspended">Suspenso</option>
+                      <option value="Limited">Limitado</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn--primary">
+                    Salvar Alterações
+                  </button>
+                </form>
               </div>
             </div>
           </div>

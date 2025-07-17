@@ -1298,6 +1298,15 @@ const components = {
       subaccount.mtmo
     );
 
+    // Preencher formulário de edição
+    const editNameInput = document.getElementById("editSubaccountName");
+    const editTypeInput = document.getElementById("editSubaccountType");
+    const editStatusInput = document.getElementById("editSubaccountStatus");
+
+    if (editNameInput) editNameInput.value = subaccount.nome;
+    if (editTypeInput) editTypeInput.value = subaccount.tipo;
+    if (editStatusInput) editStatusInput.value = subaccount.status;
+
     this.renderSubaccountChannels();
   },
 
@@ -1307,14 +1316,24 @@ const components = {
 
     container.innerHTML = "";
 
-    const channels = {
-      whatsapp: "conectado",
-      instagram: "desconectado",
-      messenger: "conectado",
-      gmail: "conectado",
-      telegram: "desconectado",
-      api: "desconectado",
-    };
+    // Usar canais da subconta se existirem, senão usar canais padrão
+    let channels;
+    if (appState.selectedSubaccount && appState.selectedSubaccount.canais) {
+      channels = appState.selectedSubaccount.canais;
+    } else {
+      channels = {
+        whatsapp: "conectado",
+        instagram: "desconectado",
+        messenger: "conectado",
+        gmail: "conectado",
+        telegram: "desconectado",
+        api: "desconectado",
+      };
+      // Salvar os canais padrão na subconta
+      if (appState.selectedSubaccount) {
+        appState.selectedSubaccount.canais = channels;
+      }
+    }
 
     Object.entries(channels).forEach(([channel, status]) => {
       const item = document.createElement("div");
@@ -1332,6 +1351,27 @@ const components = {
           }
         </div>
       `;
+
+      // Adicionar evento de clique no botão de integrar
+      const connectBtn = item.querySelector(".channel-connect-btn");
+      if (connectBtn) {
+        connectBtn.addEventListener("click", () => {
+          if (appState.selectedSubaccount) {
+            if (!appState.selectedSubaccount.canais) {
+              appState.selectedSubaccount.canais = {};
+            }
+            appState.selectedSubaccount.canais[channel] = "conectado";
+            this.renderSubaccountChannels();
+            utils.showNotification(
+              `${utils.getChannelName(
+                channel
+              )} integrado com sucesso na subconta!`,
+              "success"
+            );
+          }
+        });
+      }
+
       container.appendChild(item);
     });
   },
@@ -1775,6 +1815,38 @@ function setupEventListeners() {
       utils.showNotification("Conta atualizada com sucesso!", "success");
     }
   });
+
+  // Formulário de edição da subconta
+  const editSubaccountForm = document.getElementById("editSubaccountForm");
+  if (editSubaccountForm) {
+    editSubaccountForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("editSubaccountName").value;
+      const type = document.getElementById("editSubaccountType").value;
+      const status = document.getElementById("editSubaccountStatus").value;
+
+      if (appState.selectedSubaccount) {
+        appState.selectedSubaccount.nome = name;
+        appState.selectedSubaccount.tipo = type;
+        appState.selectedSubaccount.status = status;
+
+        // Atualizar na conta pai também
+        if (appState.selectedAccount && appState.selectedAccount.subcontas) {
+          const subaccountIndex = appState.selectedAccount.subcontas.findIndex(
+            (sub) => sub.id === appState.selectedSubaccount.id
+          );
+          if (subaccountIndex !== -1) {
+            appState.selectedAccount.subcontas[subaccountIndex] = {
+              ...appState.selectedSubaccount,
+            };
+          }
+        }
+
+        components.updateUI();
+        utils.showNotification("Subconta atualizada com sucesso!", "success");
+      }
+    });
+  }
 
   // Fechar modais
   document
