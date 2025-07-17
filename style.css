@@ -71,6 +71,9 @@
   --space-20: 20px;
   --space-24: 24px;
   --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
 
   /* Border Radius */
   --radius-sm: 6px;
@@ -458,6 +461,16 @@ select.form-control {
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+/* Add spacing between standalone cards (not in grids) */
+.card:not(.metric-card):not(.chart-card) {
+  margin-bottom: var(--space-64);
+}
+
+/* Remove margin from the last card to avoid extra space */
+.card:not(.metric-card):not(.chart-card):last-child {
+  margin-bottom: 0;
 }
 
 .card:hover {
@@ -896,7 +909,7 @@ select.form-control {
 .main-content {
   margin-left: 320px;
   margin-top: 70px;
-  padding: var(--space-32);
+  padding: var(--space-40);
   min-height: calc(100vh - 70px);
 }
 
@@ -947,7 +960,7 @@ select.form-control {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-24);
-  margin-bottom: var(--space-32);
+  margin-bottom: var(--space-64);
 }
 
 .metric-card {
@@ -1016,7 +1029,7 @@ select.form-control {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: var(--space-24);
-  margin-bottom: var(--space-32);
+  margin-bottom: var(--space-64);
 }
 
 .chart-card {
@@ -1063,13 +1076,17 @@ select.form-control {
 }
 
 .table-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-success) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-success) 100%
+  );
 }
 
 .table-controls {
@@ -1098,8 +1115,6 @@ select.form-control {
   white-space: nowrap;
   flex-shrink: 1;
 }
-
-
 
 /* Button styling in table controls */
 .table-controls .btn--secondary {
@@ -1143,14 +1158,14 @@ select.form-control {
   .table-header {
     flex-wrap: wrap;
   }
-  
+
   .table-controls {
     flex-wrap: wrap;
     order: 2;
     width: 100%;
     margin-top: var(--space-8);
   }
-  
+
   .table-header h3 {
     order: 1;
     min-width: auto;
@@ -1162,7 +1177,7 @@ select.form-control {
     min-width: 100px;
     max-width: 140px;
   }
-  
+
   .table-controls .btn {
     padding: var(--space-6) var(--space-10);
     font-size: 12px;
@@ -1421,7 +1436,11 @@ select.form-control {
 }
 
 .channel-item.connected {
-  background: linear-gradient(135deg, rgba(var(--color-success-rgb), 0.05) 0%, rgba(var(--color-success-rgb), 0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-success-rgb), 0.05) 0%,
+    rgba(var(--color-success-rgb), 0.02) 100%
+  );
   border: 2px solid rgba(var(--color-success-rgb), 0.2);
 }
 
@@ -1549,7 +1568,11 @@ select.form-control {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 100%
+  );
   color: var(--color-btn-primary-text);
   border: none;
   border-radius: var(--radius-base);
@@ -1566,7 +1589,11 @@ select.form-control {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-active) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    var(--color-primary-active) 100%
+  );
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
@@ -1604,16 +1631,16 @@ select.form-control {
     grid-template-columns: 1fr;
     gap: var(--space-16);
   }
-  
+
   .channel-card {
     padding: var(--space-20);
   }
-  
+
   .channel-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .btn-primary {
     justify-content: center;
   }

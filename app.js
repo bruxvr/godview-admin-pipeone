@@ -1286,9 +1286,14 @@ const components = {
 
     // Filtro por ID
     if (appState.filters.logSearchId) {
-      logs = logs.filter((log) => 
-        log.clienteId.toLowerCase().includes(appState.filters.logSearchId.toLowerCase()) ||
-        log.conta.toLowerCase().includes(appState.filters.logSearchId.toLowerCase())
+      logs = logs.filter(
+        (log) =>
+          log.clienteId
+            .toLowerCase()
+            .includes(appState.filters.logSearchId.toLowerCase()) ||
+          log.conta
+            .toLowerCase()
+            .includes(appState.filters.logSearchId.toLowerCase())
       );
     }
 
@@ -1473,20 +1478,26 @@ const components = {
     Object.entries(canais).forEach(([channel, status]) => {
       const isConnected = status === "conectado";
       const item = document.createElement("div");
-      item.className = `channel-item ${isConnected ? 'connected' : 'disconnected'}`;
-      
+      item.className = `channel-item ${
+        isConnected ? "connected" : "disconnected"
+      }`;
+
       item.innerHTML = `
         <div class="channel-card">
           <div class="channel-header">
             <div class="channel-icon-wrapper ${channel}">
               <i class="${utils.getChannelIcon(channel)}"></i>
             </div>
-            <div class="channel-status-indicator ${isConnected ? 'active' : 'inactive'}"></div>
+            <div class="channel-status-indicator ${
+              isConnected ? "active" : "inactive"
+            }"></div>
           </div>
           
           <div class="channel-content">
             <h4 class="channel-title">${utils.getChannelName(channel)}</h4>
-            <p class="channel-description">${this.getChannelDescription(channel)}</p>
+            <p class="channel-description">${this.getChannelDescription(
+              channel
+            )}</p>
           </div>
           
           <div class="channel-actions">
@@ -1517,9 +1528,10 @@ const components = {
       if (connectBtn) {
         connectBtn.addEventListener("click", () => {
           // Animação de loading
-          connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+          connectBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Conectando...';
           connectBtn.disabled = true;
-          
+
           setTimeout(() => {
             appState.selectedAccount.canais[channel] = "conectado";
             this.renderChannels(appState.selectedAccount.canais);
@@ -1552,7 +1564,7 @@ const components = {
       messenger: "Chat do Facebook Messenger",
       gmail: "E-mails e notificações",
       telegram: "Mensagens seguras e grupos",
-      api: "Integração via API REST"
+      api: "Integração via API REST",
     };
     return descriptions[channel] || "Canal de comunicação";
   },
@@ -1987,16 +1999,6 @@ const components = {
     console.log(
       `Restrições aplicadas para o modo: ${appState.mode.toUpperCase()}`
     );
-
-    // Mostrar notificação informativa sobre o modo atual
-    if (appState.mode === "admin") {
-      setTimeout(() => {
-        utils.showNotification(
-          "Modo ADMIN ativo: Alguns painéis estão restritos. Mude para MASTER para acesso completo.",
-          "info"
-        );
-      }, 1000);
-    }
   },
 };
 
@@ -2061,10 +2063,6 @@ function setupEventListeners() {
         e.stopPropagation();
         appState.mode = btn.dataset.mode;
         components.updateUI();
-        utils.showNotification(
-          `Modo ${appState.mode.toUpperCase()} ativado`,
-          "info"
-        );
       });
       console.log(`✅ Mode button ${index + 1} configurado`);
     }
@@ -2224,15 +2222,20 @@ function setupEventListeners() {
 
   document.getElementById("exportLogs").addEventListener("click", () => {
     let logs = [...appData.logs];
-    
+
     // Aplicar os mesmos filtros da tabela
     if (appState.filters.logSearchId) {
-      logs = logs.filter((log) => 
-        log.clienteId.toLowerCase().includes(appState.filters.logSearchId.toLowerCase()) ||
-        log.conta.toLowerCase().includes(appState.filters.logSearchId.toLowerCase())
+      logs = logs.filter(
+        (log) =>
+          log.clienteId
+            .toLowerCase()
+            .includes(appState.filters.logSearchId.toLowerCase()) ||
+          log.conta
+            .toLowerCase()
+            .includes(appState.filters.logSearchId.toLowerCase())
       );
     }
-    
+
     if (appState.filters.logDate) {
       const filterDate = new Date(appState.filters.logDate);
       logs = logs.filter((log) => {
@@ -2240,11 +2243,11 @@ function setupEventListeners() {
         return logDate.toDateString() === filterDate.toDateString();
       });
     }
-    
+
     if (appState.filters.logType) {
       logs = logs.filter((log) => log.tipo === appState.filters.logType);
     }
-    
+
     if (appState.filters.logChannel) {
       logs = logs.filter((log) => log.canal === appState.filters.logChannel);
     }
