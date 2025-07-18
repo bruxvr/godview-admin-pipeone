@@ -1107,6 +1107,101 @@ const components = {
     return date.toISOString().split("T")[0];
   },
 
+  createCompany() {
+    // Coletando dados do formulário
+    const formData = {
+      // Informações básicas
+      nomeEmpresa: document.getElementById("createCompanyName").value,
+      tipo: document.getElementById("createCompanyType").value,
+      status: document.getElementById("createCompanyStatus").value,
+      email: document.getElementById("createCompanyEmail").value,
+
+      // Limites
+      limiteBulk:
+        parseInt(document.getElementById("createBulkLimit").value) || 1000,
+      limiteDiario:
+        parseInt(document.getElementById("createDailyLimit").value) || 500,
+      limiteContatos:
+        parseInt(document.getElementById("createContactLimit").value) || 10000,
+      limiteUsuarios:
+        parseInt(document.getElementById("createUserLimit").value) || 25,
+
+      // Cobrança
+      plano: document.getElementById("createPlan").value,
+      dataVencimento: document.getElementById("createBillingDate").value,
+      renovacaoAutomatica: document.getElementById("createAutoRenewal").checked,
+      periodoTrial: document.getElementById("createTrialPeriod").checked,
+
+      // Configurações administrativas
+      adminNome: document.getElementById("createAdminName").value,
+      adminEmail: document.getElementById("createAdminEmail").value,
+      timezone: document.getElementById("createTimezone").value,
+      idioma: document.getElementById("createLanguage").value,
+    };
+
+    // Validação básica
+    if (!formData.nomeEmpresa || !formData.tipo) {
+      alert("Por favor, preencha todos os campos obrigatórios!");
+      return;
+    }
+
+    // Criar nova empresa
+    const novaEmpresa = {
+      id: appData.contas.length + 1,
+      nome: formData.nomeEmpresa,
+      tipo: formData.tipo,
+      status: formData.status,
+      contatos: 0,
+      mtmo: 0,
+      usuarios: 0,
+      usuariosOnline: 0,
+      conversasAbertas: 0,
+      bulksRealizados: 0,
+      bulkRestantes: `0/${formData.limiteBulk}`,
+      mensagensEnviadas: 0,
+      limiteDiario: formData.limiteDiario,
+      limiteContatos: formData.limiteContatos,
+      limiteUsuarios: formData.limiteUsuarios,
+      plano: formData.plano,
+      dataVencimento: formData.dataVencimento,
+      renovacaoAutomatica: formData.renovacaoAutomatica,
+      timezone: formData.timezone,
+      idioma: formData.idioma,
+      usuarios_detalhados: [],
+      subcontas: [],
+      dataCreacao: new Date().toLocaleDateString("pt-BR"),
+      contato: {
+        email: formData.email || formData.adminEmail,
+      },
+    };
+
+    // Se tiver administrador, adicionar aos usuários
+    if (formData.adminNome && formData.adminEmail) {
+      novaEmpresa.usuarios_detalhados.push({
+        nome: formData.adminNome,
+        email: formData.adminEmail,
+        cargo: "Admin",
+        ultimoLogin: "Nunca",
+        status: "offline",
+      });
+      novaEmpresa.usuarios = 1;
+    }
+
+    // Adicionar à lista de contas
+    appData.contas.push(novaEmpresa);
+
+    // Atualizar tabela
+    this.renderCompaniesTable();
+
+    // Fechar modal
+    utils.closeModal("createCompanyModal");
+
+    // Resetar formulário
+    document.getElementById("createCompanyForm").reset();
+
+    alert("Empresa criada com sucesso!");
+  },
+
   saveAccountSettings() {
     if (!appState.editingAccount) {
       console.error("Nenhuma conta sendo editada");
@@ -1165,6 +1260,10 @@ const components = {
       "Configurações da conta atualizadas com sucesso!",
       "success"
     );
+  },
+
+  openCreateCompanyModal() {
+    utils.openModal("createCompanyModal");
   },
 
   handleImageUpload() {
@@ -2919,6 +3018,14 @@ function setupEventListeners() {
     });
   }
 
+  // Criar empresa
+  const createCompany = document.getElementById("createCompany");
+  if (createCompany) {
+    createCompany.addEventListener("click", () => {
+      components.openCreateCompanyModal();
+    });
+  }
+
   // Selecionar todas as empresas
   const selectAllCompanies = document.getElementById("selectAllCompanies");
   if (selectAllCompanies) {
@@ -3137,6 +3244,12 @@ function setupEventListeners() {
   document
     .getElementById("cancelAccountSettings")
     .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("closeCreateCompanyModal")
+    .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("cancelCreateCompany")
+    .addEventListener("click", utils.closeModal);
 
   // Formulários dos modais
   document.getElementById("createUserForm").addEventListener("submit", (e) => {
@@ -3203,6 +3316,14 @@ function setupEventListeners() {
     .addEventListener("submit", (e) => {
       e.preventDefault();
       components.saveAccountSettings();
+    });
+
+  // Formulário de criar empresa
+  document
+    .getElementById("createCompanyForm")
+    .addEventListener("submit", (e) => {
+      e.preventDefault();
+      components.createCompany();
     });
 
   // Botão de upload de imagem

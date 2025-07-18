@@ -197,6 +197,9 @@
                   <option value="ATIVO">✅ Ativo</option>
                   <option value="INATIVO">❌ Inativo</option>
                 </select>
+                <button class="btn btn--primary" id="createCompany">
+                  <i class="fas fa-plus"></i> Criar Conta
+                </button>
                 <button class="btn btn--secondary" id="exportCompanies">
                   <i class="fas fa-download"></i> Exportar
                 </button>
@@ -1186,6 +1189,246 @@
               </button>
               <button type="submit" class="btn btn--primary">
                 <i class="fas fa-save"></i> Salvar Configurações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Create Company Modal -->
+      <div class="modal modal-large hidden" id="createCompanyModal">
+        <div class="modal-header">
+          <h3>Criar Nova Conta</h3>
+          <button class="modal-close" id="closeCreateCompanyModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="createCompanyForm">
+            <div class="create-company-content">
+              <!-- Basic Information Section -->
+              <div class="form-section">
+                <h4>Informações Básicas</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nome da Empresa *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="createCompanyName"
+                      placeholder="Digite o nome da empresa"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tipo de Conta *</label>
+                    <select
+                      class="form-control"
+                      id="createCompanyType"
+                      required
+                    >
+                      <option value="">Selecione o tipo</option>
+                      <option value="Enterprise">Enterprise</option>
+                      <option value="Department">Department</option>
+                      <option value="Team">Team</option>
+                      <option value="Startup">Startup</option>
+                      <option value="Individual">Individual</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Status Inicial</label>
+                    <select class="form-control" id="createCompanyStatus">
+                      <option value="Active">Ativo</option>
+                      <option value="Trial">Trial</option>
+                      <option value="Suspended">Suspenso</option>
+                      <option value="Limited">Limitado</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email Principal</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="createCompanyEmail"
+                      placeholder="contato@empresa.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Limits Section -->
+              <div class="form-section">
+                <h4>Limites da Conta</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Limite de Bulk Mensal</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="createBulkLimit"
+                      min="0"
+                      value="1000"
+                      placeholder="1000"
+                    />
+                    <small class="form-help"
+                      >Número máximo de mensagens em bulk por mês</small
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Limite Diário de Mensagens</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="createDailyLimit"
+                      min="0"
+                      value="500"
+                      placeholder="500"
+                    />
+                    <small class="form-help"
+                      >Número máximo de mensagens por dia</small
+                    >
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Limite de Contatos</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="createContactLimit"
+                      min="0"
+                      value="10000"
+                      placeholder="10000"
+                    />
+                    <small class="form-help"
+                      >Número máximo de contatos na base</small
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Limite de Usuários</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="createUserLimit"
+                      min="1"
+                      value="25"
+                      placeholder="25"
+                    />
+                    <small class="form-help"
+                      >Número máximo de usuários na conta</small
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Billing Information Section -->
+              <div class="form-section">
+                <h4>Informações de Cobrança</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Plano</label>
+                    <select class="form-control" id="createPlan">
+                      <option value="basic">Básico - R$ 29,90</option>
+                      <option value="standard">Standard - R$ 99,90</option>
+                      <option value="premium">Premium - R$ 199,90</option>
+                      <option value="enterprise">Enterprise - R$ 499,90</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Data de Vencimento</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="createBillingDate"
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="createAutoRenewal" checked />
+                      <span class="checkmark"></span>
+                      Renovação Automática
+                    </label>
+                  </div>
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="createTrialPeriod" />
+                      <span class="checkmark"></span>
+                      Período de Trial (30 dias)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Administrative Settings Section -->
+              <div class="form-section">
+                <h4>Configurações Administrativas</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Administrador Principal</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="createAdminName"
+                      placeholder="Nome do administrador"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email do Administrador</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="createAdminEmail"
+                      placeholder="admin@empresa.com"
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Timezone</label>
+                    <select class="form-control" id="createTimezone">
+                      <option value="America/Sao_Paulo">
+                        São Paulo (GMT-3)
+                      </option>
+                      <option value="America/New_York">New York (GMT-5)</option>
+                      <option value="Europe/London">London (GMT+0)</option>
+                      <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Idioma</label>
+                    <select class="form-control" id="createLanguage">
+                      <option value="pt-BR">Português (Brasil)</option>
+                      <option value="en-US">English (US)</option>
+                      <option value="es-ES">Español</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-info">
+                <p class="info-text">
+                  <i class="fas fa-info-circle"></i>
+                  A conta será criada com todos os canais desconectados. O
+                  administrador principal receberá um email de boas-vindas com
+                  instruções para configurar a conta.
+                </p>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn btn--secondary"
+                id="cancelCreateCompany"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn--primary">
+                <i class="fas fa-plus"></i> Criar Conta
               </button>
             </div>
           </form>

@@ -1213,6 +1213,15 @@ select.form-control {
     padding: var(--space-6) var(--space-10);
     font-size: 12px;
   }
+
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-controls .btn--primary {
+    order: 0;
+  }
 }
 
 .table-container {
@@ -2228,4 +2237,50 @@ select.form-control {
 .form-label:has(+ textarea[required])::after {
   content: " *";
   color: var(--color-error);
+}
+
+/* Create Company Modal Styles */
+.create-company-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+.form-section {
+  padding: var(--space-20);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.form-section h4 {
+  margin: 0 0 var(--space-16) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Table controls enhancement */
+.table-controls {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.table-controls .btn--primary {
+  order: -1; /* Move create button to the beginning */
+}
+
+@media (max-width: 768px) {
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-controls .btn--primary {
+    order: 0;
+  }
 }
