@@ -476,7 +476,7 @@ let appState = {
   currentPage: "dashboard",
   selectedAccount: null,
   selectedSubaccount: null,
-  mode: "admin",
+  mode: "master",
   theme: "light",
   period: "1_mes",
   sidebarOpen: false,
@@ -2832,20 +2832,6 @@ const components = {
         });
       }
     });
-
-    console.log(
-      `Restrições aplicadas para o modo: ${appState.mode.toUpperCase()}`
-    );
-
-    // Mostrar notificação informativa sobre o modo atual
-    if (appState.mode === "admin") {
-      setTimeout(() => {
-        utils.showNotification(
-          "Modo ADMIN ativo: Alguns painéis estão restritos. Mude para MASTER para acesso completo.",
-          "info"
-        );
-      }, 1000);
-    }
   },
 };
 
@@ -2910,10 +2896,6 @@ function setupEventListeners() {
         e.stopPropagation();
         appState.mode = btn.dataset.mode;
         components.updateUI();
-        utils.showNotification(
-          `Modo ${appState.mode.toUpperCase()} ativado`,
-          "info"
-        );
       });
       console.log(`✅ Mode button ${index + 1} configurado`);
     }
