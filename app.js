@@ -1126,15 +1126,10 @@ const components = {
       limiteUsuarios:
         parseInt(document.getElementById("createUserLimit").value) || 25,
 
-      // Cobrança
-      plano: document.getElementById("createPlan").value,
-      dataVencimento: document.getElementById("createBillingDate").value,
-      renovacaoAutomatica: document.getElementById("createAutoRenewal").checked,
-      periodoTrial: document.getElementById("createTrialPeriod").checked,
-
       // Configurações administrativas
       adminNome: document.getElementById("createAdminName").value,
       adminEmail: document.getElementById("createAdminEmail").value,
+      adminCargo: document.getElementById("createAdminRole").value,
       timezone: document.getElementById("createTimezone").value,
       idioma: document.getElementById("createLanguage").value,
     };
@@ -1162,9 +1157,6 @@ const components = {
       limiteDiario: formData.limiteDiario,
       limiteContatos: formData.limiteContatos,
       limiteUsuarios: formData.limiteUsuarios,
-      plano: formData.plano,
-      dataVencimento: formData.dataVencimento,
-      renovacaoAutomatica: formData.renovacaoAutomatica,
       timezone: formData.timezone,
       idioma: formData.idioma,
       usuarios_detalhados: [],
@@ -1180,7 +1172,7 @@ const components = {
       novaEmpresa.usuarios_detalhados.push({
         nome: formData.adminNome,
         email: formData.adminEmail,
-        cargo: "Admin",
+        cargo: formData.adminCargo || "Administrador",
         ultimoLogin: "Nunca",
         status: "offline",
       });
