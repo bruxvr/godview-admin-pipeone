@@ -886,6 +886,265 @@
           </form>
         </div>
       </div>
+
+      <!-- Account Settings Modal -->
+      <div class="modal modal-medium hidden" id="accountSettingsModal">
+        <div class="modal-header">
+          <h3>
+            Configurações da Conta - <span id="accountSettingsTitle"></span>
+          </h3>
+          <button class="modal-close" id="closeAccountSettingsModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="accountSettingsForm">
+            <div class="settings-content">
+              <!-- Basic Information Section -->
+              <div class="settings-section">
+                <h4>Informações Básicas</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nome da Empresa</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="settingsAccountName"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tipo de Conta</label>
+                    <select class="form-control" id="settingsAccountType">
+                      <option value="Enterprise">Enterprise</option>
+                      <option value="Department">Department</option>
+                      <option value="Team">Team</option>
+                      <option value="Startup">Startup</option>
+                      <option value="Individual">Individual</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Status da Conta</label>
+                    <select class="form-control" id="settingsAccountStatus">
+                      <option value="Active">Ativo</option>
+                      <option value="Trial">Trial</option>
+                      <option value="Suspended">Suspenso</option>
+                      <option value="Limited">Limitado</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">ID da Empresa</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="settingsAccountId"
+                      readonly
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Image Section -->
+              <div class="settings-section">
+                <h4>Imagem da Conta</h4>
+                <div class="image-upload-section">
+                  <div class="current-image">
+                    <img
+                      id="currentAccountImage"
+                      src="https://via.placeholder.com/100x100/21808D/FFFFFF?text=IMG"
+                      alt="Imagem da conta"
+                    />
+                  </div>
+                  <div class="image-controls">
+                    <input
+                      type="file"
+                      id="accountImageInput"
+                      accept="image/*"
+                      style="display: none"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn--secondary"
+                      id="uploadImageBtn"
+                    >
+                      <i class="fas fa-upload"></i> Alterar Imagem
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--outline"
+                      id="removeImageBtn"
+                    >
+                      <i class="fas fa-trash"></i> Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Messaging Limits Section -->
+              <div class="settings-section">
+                <h4>Limites de Mensagens</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Limite de Bulk Mensal</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="settingsBulkLimit"
+                      min="0"
+                      placeholder="1000"
+                    />
+                    <small class="form-help"
+                      >Número máximo de mensagens em bulk por mês</small
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Limite Diário de Mensagens</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="settingsDailyLimit"
+                      min="0"
+                      placeholder="500"
+                    />
+                    <small class="form-help"
+                      >Número máximo de mensagens por dia</small
+                    >
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Limite de Contatos</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="settingsContactLimit"
+                      min="0"
+                      placeholder="10000"
+                    />
+                    <small class="form-help"
+                      >Número máximo de contatos na base</small
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Limite de Usuários</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="settingsUserLimit"
+                      min="1"
+                      placeholder="50"
+                    />
+                    <small class="form-help"
+                      >Número máximo de usuários na conta</small
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Billing Information Section -->
+              <div class="settings-section">
+                <h4>Informações de Cobrança</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Plano Atual</label>
+                    <select class="form-control" id="settingsPlan">
+                      <option value="basic">Básico</option>
+                      <option value="standard">Standard</option>
+                      <option value="premium">Premium</option>
+                      <option value="enterprise">Enterprise</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Data de Vencimento</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="settingsBillingDate"
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Valor Mensal (R$)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="settingsMonthlyValue"
+                      min="0"
+                      step="0.01"
+                      placeholder="99.90"
+                    />
+                  </div>
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="settingsAutoRenewal" />
+                      <span class="checkmark"></span>
+                      Renovação Automática
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Settings Section -->
+              <div class="settings-section">
+                <h4>Configurações Adicionais</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Timezone</label>
+                    <select class="form-control" id="settingsTimezone">
+                      <option value="America/Sao_Paulo">
+                        São Paulo (GMT-3)
+                      </option>
+                      <option value="America/New_York">New York (GMT-5)</option>
+                      <option value="Europe/London">London (GMT+0)</option>
+                      <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Idioma</label>
+                    <select class="form-control" id="settingsLanguage">
+                      <option value="pt-BR">Português (Brasil)</option>
+                      <option value="en-US">English (US)</option>
+                      <option value="es-ES">Español</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="settingsNotifications" />
+                      <span class="checkmark"></span>
+                      Receber notificações por email
+                    </label>
+                  </div>
+                  <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="settingsAnalytics" />
+                      <span class="checkmark"></span>
+                      Permitir análise de dados
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn btn--secondary"
+                id="cancelAccountSettings"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn--primary">
+                <i class="fas fa-save"></i> Salvar Configurações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- Notification Panel -->

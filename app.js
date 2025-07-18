@@ -66,6 +66,19 @@ const appData = {
         telegram: "desconectado",
         api: "conectado",
       },
+      // Configurações adicionais
+      limiteDiario: "500",
+      limiteContatos: "20000",
+      limiteUsuarios: "25",
+      plano: "premium",
+      dataVencimento: "2025-08-15",
+      valorMensal: "299.90",
+      renovacaoAutomatica: true,
+      timezone: "America/Sao_Paulo",
+      idioma: "pt-BR",
+      notificacoes: true,
+      analytics: true,
+      imagem: null,
       usuarios_detalhados: [
         {
           nome: "João Silva",
@@ -471,6 +484,7 @@ let appState = {
   currentPageNum: 1,
   itemsPerPage: 10,
   editingUser: null,
+  editingAccount: null,
   filters: {
     searchTerm: "",
     type: "",
@@ -669,11 +683,14 @@ const utils = {
     // Resetar formulários dos novos modais
     const inviteForm = document.getElementById("inviteUserForm");
     const editForm = document.getElementById("editUserForm");
+    const settingsForm = document.getElementById("accountSettingsForm");
     if (inviteForm) inviteForm.reset();
     if (editForm) editForm.reset();
+    if (settingsForm) settingsForm.reset();
 
     // Limpar estado de edição
     appState.editingUser = null;
+    appState.editingAccount = null;
   },
 };
 
@@ -981,6 +998,215 @@ const components = {
     this.renderUsersManagementTable(company);
 
     utils.showNotification("Usuário atualizado com sucesso!", "success");
+  },
+
+  openAccountSettingsModal(companyId) {
+    const company = utils.findAccountById(appData.contas, companyId);
+    if (!company) {
+      console.error("Empresa não encontrada:", companyId);
+      return;
+    }
+
+    // Atualizar o título do modal
+    const accountSettingsTitle = document.getElementById(
+      "accountSettingsTitle"
+    );
+    if (accountSettingsTitle) {
+      accountSettingsTitle.textContent = company.nome;
+    }
+
+    // Preencher o formulário com os dados da empresa
+    this.populateAccountSettings(company);
+
+    // Armazenar dados para edição
+    appState.editingAccount = { companyId };
+
+    // Abrir o modal
+    utils.openModal("accountSettingsModal");
+  },
+
+  populateAccountSettings(company) {
+    // Informações básicas
+    document.getElementById("settingsAccountName").value = company.nome || "";
+    document.getElementById("settingsAccountType").value =
+      company.tipo || "Enterprise";
+    document.getElementById("settingsAccountStatus").value =
+      company.status || "Active";
+    document.getElementById("settingsAccountId").value = company.id || "";
+
+    // Limites de mensagens (usar valores padrão se não existirem)
+    const bulkRemaining = company.bulkRestantes || "1000/1000";
+    const [used, total] = bulkRemaining.split("/");
+    document.getElementById("settingsBulkLimit").value = total || "1000";
+    document.getElementById("settingsDailyLimit").value =
+      company.limiteDiario || "500";
+    document.getElementById("settingsContactLimit").value =
+      company.limiteContatos || "10000";
+    document.getElementById("settingsUserLimit").value =
+      company.limiteUsuarios || "50";
+
+    // Informações de cobrança (usar valores padrão)
+    document.getElementById("settingsPlan").value = this.getAccountPlan(
+      company.tipo
+    );
+    document.getElementById("settingsBillingDate").value =
+      company.dataVencimento || this.getNextBillingDate();
+    document.getElementById("settingsMonthlyValue").value =
+      company.valorMensal || this.getDefaultPlanValue(company.tipo);
+    document.getElementById("settingsAutoRenewal").checked =
+      company.renovacaoAutomatica !== false;
+
+    // Configurações adicionais
+    document.getElementById("settingsTimezone").value =
+      company.timezone || "America/Sao_Paulo";
+    document.getElementById("settingsLanguage").value =
+      company.idioma || "pt-BR";
+    document.getElementById("settingsNotifications").checked =
+      company.notificacoes !== false;
+    document.getElementById("settingsAnalytics").checked =
+      company.analytics !== false;
+
+    // Imagem da conta
+    const accountImage = document.getElementById("currentAccountImage");
+    if (company.imagem) {
+      accountImage.src = company.imagem;
+    } else {
+      accountImage.src = `https://via.placeholder.com/100x100/21808D/FFFFFF?text=${company.nome.charAt(
+        0
+      )}`;
+    }
+  },
+
+  getAccountPlan(tipo) {
+    const planMapping = {
+      Individual: "basic",
+      Startup: "standard",
+      Department: "standard",
+      Team: "standard",
+      Enterprise: "premium",
+    };
+    return planMapping[tipo] || "standard";
+  },
+
+  getDefaultPlanValue(tipo) {
+    const valueMapping = {
+      Individual: "29.90",
+      Startup: "99.90",
+      Department: "199.90",
+      Team: "149.90",
+      Enterprise: "499.90",
+    };
+    return valueMapping[tipo] || "99.90";
+  },
+
+  getNextBillingDate() {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 1);
+    return date.toISOString().split("T")[0];
+  },
+
+  saveAccountSettings() {
+    if (!appState.editingAccount) {
+      console.error("Nenhuma conta sendo editada");
+      return;
+    }
+
+    const { companyId } = appState.editingAccount;
+    const company = utils.findAccountById(appData.contas, companyId);
+
+    if (!company) {
+      console.error("Empresa não encontrada para edição");
+      return;
+    }
+
+    // Atualizar informações básicas
+    company.nome = document.getElementById("settingsAccountName").value;
+    company.tipo = document.getElementById("settingsAccountType").value;
+    company.status = document.getElementById("settingsAccountStatus").value;
+
+    // Atualizar limites
+    const bulkLimit = document.getElementById("settingsBulkLimit").value;
+    const [currentUsed] = (company.bulkRestantes || "0/1000").split("/");
+    company.bulkRestantes = `${currentUsed}/${bulkLimit}`;
+    company.limiteDiario = document.getElementById("settingsDailyLimit").value;
+    company.limiteContatos = document.getElementById(
+      "settingsContactLimit"
+    ).value;
+    company.limiteUsuarios = document.getElementById("settingsUserLimit").value;
+
+    // Atualizar informações de cobrança
+    company.plano = document.getElementById("settingsPlan").value;
+    company.dataVencimento = document.getElementById(
+      "settingsBillingDate"
+    ).value;
+    company.valorMensal = document.getElementById("settingsMonthlyValue").value;
+    company.renovacaoAutomatica = document.getElementById(
+      "settingsAutoRenewal"
+    ).checked;
+
+    // Atualizar configurações adicionais
+    company.timezone = document.getElementById("settingsTimezone").value;
+    company.idioma = document.getElementById("settingsLanguage").value;
+    company.notificacoes = document.getElementById(
+      "settingsNotifications"
+    ).checked;
+    company.analytics = document.getElementById("settingsAnalytics").checked;
+
+    // Fechar modal e limpar estado
+    utils.closeModal();
+    appState.editingAccount = null;
+
+    // Renderizar novamente a tabela principal
+    this.renderCompaniesTable();
+
+    utils.showNotification(
+      "Configurações da conta atualizadas com sucesso!",
+      "success"
+    );
+  },
+
+  handleImageUpload() {
+    const input = document.getElementById("accountImageInput");
+    const file = input.files[0];
+
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        // 2MB limit
+        utils.showNotification("Imagem muito grande. Máximo 2MB.", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const accountImage = document.getElementById("currentAccountImage");
+        accountImage.src = e.target.result;
+
+        // Salvar na empresa se estiver editando
+        if (appState.editingAccount) {
+          const { companyId } = appState.editingAccount;
+          const company = utils.findAccountById(appData.contas, companyId);
+          if (company) {
+            company.imagem = e.target.result;
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+
+  removeAccountImage() {
+    const accountImage = document.getElementById("currentAccountImage");
+
+    if (appState.editingAccount) {
+      const { companyId } = appState.editingAccount;
+      const company = utils.findAccountById(appData.contas, companyId);
+      if (company) {
+        accountImage.src = `https://via.placeholder.com/100x100/21808D/FFFFFF?text=${company.nome.charAt(
+          0
+        )}`;
+        company.imagem = null;
+      }
+    }
   },
 
   toggleNode(accountId) {
@@ -1516,6 +1742,16 @@ const components = {
         e.preventDefault();
         e.stopPropagation();
         this.openUsersManagementModal(account.id);
+      });
+    }
+
+    // Event listener para o botão de configurações
+    const settingsBtn = row.querySelector(".btn--secondary");
+    if (settingsBtn && settingsBtn.querySelector(".fa-cog")) {
+      settingsBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openAccountSettingsModal(account.id);
       });
     }
 
@@ -2743,6 +2979,12 @@ function setupEventListeners() {
   document
     .getElementById("cancelEditUser")
     .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("closeAccountSettingsModal")
+    .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("cancelAccountSettings")
+    .addEventListener("click", utils.closeModal);
 
   // Formulários dos modais
   document.getElementById("createUserForm").addEventListener("submit", (e) => {
@@ -2820,6 +3062,31 @@ function setupEventListeners() {
   document.getElementById("editUserForm").addEventListener("submit", (e) => {
     e.preventDefault();
     components.saveUserEdit();
+  });
+
+  // Formulário de configurações da conta
+  document
+    .getElementById("accountSettingsForm")
+    .addEventListener("submit", (e) => {
+      e.preventDefault();
+      components.saveAccountSettings();
+    });
+
+  // Botão de upload de imagem
+  document.getElementById("uploadImageBtn").addEventListener("click", () => {
+    document.getElementById("accountImageInput").click();
+  });
+
+  // Input de arquivo de imagem
+  document
+    .getElementById("accountImageInput")
+    .addEventListener("change", () => {
+      components.handleImageUpload();
+    });
+
+  // Botão de remover imagem
+  document.getElementById("removeImageBtn").addEventListener("click", () => {
+    components.removeAccountImage();
   });
 
   // Fechar modal clicando fora
