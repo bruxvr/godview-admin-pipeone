@@ -238,26 +238,17 @@
             <div class="table-header">
               <h3>Ranking de Contas</h3>
               <div class="table-controls">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="searchRanking"
-                  placeholder="🔍 Buscar contas..."
-                />
-                <select class="form-control" id="filterType">
-                  <option value="">🏢 Tipos</option>
-                  <option value="Enterprise">🏛️ Enterprise</option>
-                  <option value="Department">🏬 Department</option>
-                  <option value="Team">👥 Team</option>
-                  <option value="Startup">🚀 Startup</option>
-                  <option value="Individual">👤 Individual</option>
-                </select>
-                <select class="form-control" id="filterStatus">
-                  <option value="">📊 Status</option>
-                  <option value="Active">✅ Ativo</option>
-                  <option value="Trial">🔄 Trial</option>
-                  <option value="Suspended">⏸️ Suspenso</option>
-                  <option value="Limited">⚠️ Limitado</option>
+                <select class="form-control" id="sortRanking">
+                  <option value="contatos_desc">
+                    📈 Maiores Contas (Contatos)
+                  </option>
+                  <option value="contatos_asc">
+                    � Menores Contas (Contatos)
+                  </option>
+                  <option value="mtmo_desc">📊 Maior MTMO</option>
+                  <option value="mtmo_asc">� Menor MTMO</option>
+                  <option value="nome_asc">🔤 A-Z (Nome)</option>
+                  <option value="nome_desc">🔤 Z-A (Nome)</option>
                 </select>
                 <button class="btn btn--secondary" id="exportRanking">
                   <i class="fas fa-download"></i> Exportar

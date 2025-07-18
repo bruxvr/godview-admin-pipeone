@@ -1662,39 +1662,28 @@ const components = {
 
     let accounts = utils.flattenAccounts(appData.contas);
 
-    // Aplicar filtros
-    if (appState.filters.searchTerm) {
-      accounts = accounts.filter((acc) =>
-        acc.nome
-          .toLowerCase()
-          .includes(appState.filters.searchTerm.toLowerCase())
-      );
-    }
+    // Aplicar ordenação baseada no select
+    const sortSelect = document.getElementById("sortRanking");
+    const sortValue = sortSelect ? sortSelect.value : "contatos_desc";
 
-    if (appState.filters.type) {
-      accounts = accounts.filter((acc) => acc.tipo === appState.filters.type);
-    }
-
-    if (appState.filters.status) {
-      accounts = accounts.filter(
-        (acc) => acc.status === appState.filters.status
-      );
-    }
-
-    // Ordenar
     accounts.sort((a, b) => {
-      let aVal = a[appState.sortBy];
-      let bVal = b[appState.sortBy];
+      let aVal, bVal;
 
-      if (typeof aVal === "string") {
-        aVal = aVal.toLowerCase();
-        bVal = bVal.toLowerCase();
-      }
-
-      if (appState.sortDirection === "asc") {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
+      switch (sortValue) {
+        case "contatos_desc":
+          return (b.contatos || 0) - (a.contatos || 0);
+        case "contatos_asc":
+          return (a.contatos || 0) - (b.contatos || 0);
+        case "mtmo_desc":
+          return (b.mtmo || 0) - (a.mtmo || 0);
+        case "mtmo_asc":
+          return (a.mtmo || 0) - (b.mtmo || 0);
+        case "nome_asc":
+          return a.nome.toLowerCase().localeCompare(b.nome.toLowerCase());
+        case "nome_desc":
+          return b.nome.toLowerCase().localeCompare(a.nome.toLowerCase());
+        default:
+          return (b.contatos || 0) - (a.contatos || 0);
       }
     });
 
@@ -2935,23 +2924,13 @@ function setupEventListeners() {
   );
 
   // Filtros das tabelas
-  document.getElementById("searchRanking").addEventListener("input", (e) => {
-    appState.filters.searchTerm = e.target.value;
-    appState.currentPageNum = 1;
-    components.renderRankingTable();
-  });
-
-  document.getElementById("filterType").addEventListener("change", (e) => {
-    appState.filters.type = e.target.value;
-    appState.currentPageNum = 1;
-    components.renderRankingTable();
-  });
-
-  document.getElementById("filterStatus").addEventListener("change", (e) => {
-    appState.filters.status = e.target.value;
-    appState.currentPageNum = 1;
-    components.renderRankingTable();
-  });
+  const sortRanking = document.getElementById("sortRanking");
+  if (sortRanking) {
+    sortRanking.addEventListener("change", (e) => {
+      appState.currentPageNum = 1;
+      components.renderRankingTable();
+    });
+  }
 
   // Filtros da tabela de empresas
   const searchCompanies = document.getElementById("searchCompanies");
