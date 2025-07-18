@@ -622,43 +622,6 @@ const utils = {
     URL.revokeObjectURL(link.href);
   },
 
-  showNotification(message, type = "info") {
-    const notification = document.createElement("div");
-    notification.className = `notification notification--${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-      position: fixed;
-      top: 90px;
-      right: 20px;
-      background: var(--color-${
-        type === "success" ? "success" : type === "error" ? "error" : "info"
-      });
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      z-index: 3000;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-    `;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-      notification.style.opacity = "1";
-      notification.style.transform = "translateX(0)";
-    }, 10);
-
-    setTimeout(() => {
-      notification.style.opacity = "0";
-      notification.style.transform = "translateX(100%)";
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
-    }, 3000);
-  },
-
   openModal(modalId) {
     const overlay = document.getElementById("modalOverlay");
     const targetModal = document.getElementById(modalId);
@@ -922,8 +885,6 @@ const components = {
 
       // Atualizar a tabela principal de empresas
       this.renderCompaniesTable();
-
-      utils.showNotification("Usuário excluído com sucesso!", "success");
     }
   },
 
@@ -939,7 +900,6 @@ const components = {
       (user) => user.email === email
     );
     if (emailExists) {
-      utils.showNotification("Este email já está cadastrado!", "error");
       return;
     }
 
@@ -968,8 +928,6 @@ const components = {
 
     // Atualizar a tabela principal de empresas
     this.renderCompaniesTable();
-
-    utils.showNotification("Usuário convidado com sucesso!", "success");
   },
 
   saveUserEdit() {
@@ -998,8 +956,6 @@ const components = {
 
     // Renderizar novamente a tabela
     this.renderUsersManagementTable(company);
-
-    utils.showNotification("Usuário atualizado com sucesso!", "success");
   },
 
   openAccountSettingsModal(companyId) {
@@ -1063,8 +1019,6 @@ const components = {
       company.timezone || "America/Sao_Paulo";
     document.getElementById("settingsLanguage").value =
       company.idioma || "pt-BR";
-    document.getElementById("settingsNotifications").checked =
-      company.notificacoes !== false;
     document.getElementById("settingsAnalytics").checked =
       company.analytics !== false;
 
@@ -1236,9 +1190,6 @@ const components = {
     // Atualizar configurações adicionais
     company.timezone = document.getElementById("settingsTimezone").value;
     company.idioma = document.getElementById("settingsLanguage").value;
-    company.notificacoes = document.getElementById(
-      "settingsNotifications"
-    ).checked;
     company.analytics = document.getElementById("settingsAnalytics").checked;
 
     // Fechar modal e limpar estado
@@ -1247,11 +1198,6 @@ const components = {
 
     // Renderizar novamente a tabela principal
     this.renderCompaniesTable();
-
-    utils.showNotification(
-      "Configurações da conta atualizadas com sucesso!",
-      "success"
-    );
   },
 
   openCreateCompanyModal() {
@@ -1265,7 +1211,7 @@ const components = {
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         // 2MB limit
-        utils.showNotification("Imagem muito grande. Máximo 2MB.", "error");
+
         return;
       }
 
@@ -1371,7 +1317,6 @@ const components = {
 
     // Validações
     if (!name) {
-      utils.showNotification("Nome da subconta é obrigatório!", "error");
       return;
     }
 
@@ -1382,7 +1327,6 @@ const components = {
         (sub) => sub.nome.toLowerCase() === name.toLowerCase()
       )
     ) {
-      utils.showNotification("Já existe uma subconta com este nome!", "error");
       return;
     }
 
@@ -1432,8 +1376,6 @@ const components = {
     // Atualizar a interface
     this.renderCompaniesTable();
     this.renderSidebar();
-
-    utils.showNotification(`Subconta "${name}" criada com sucesso!`, "success");
   },
 
   toggleNode(accountId) {
@@ -1722,30 +1664,7 @@ const components = {
         </td>
         <td>${utils.formatNumber(account.contatos)}</td>
         <td>${utils.formatNumber(account.mtmo)}</td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn btn--sm btn--primary action-btn" data-account-id="${
-              account.id
-            }">
-              <i class="fas fa-eye"></i> Detalhes
-            </button>
-            <button class="btn btn--sm btn--secondary action-btn">
-              <i class="fas fa-users"></i> Usuários
-            </button>
-          </div>
-        </td>
       `;
-
-      const detailsBtn = row.querySelector("[data-account-id]");
-      detailsBtn.addEventListener("click", () => {
-        const accountToSelect = utils.findAccountById(
-          appData.contas,
-          account.id
-        );
-        if (accountToSelect) {
-          this.selectAccount(accountToSelect);
-        }
-      });
 
       tbody.appendChild(row);
     });
@@ -2361,10 +2280,6 @@ const components = {
           setTimeout(() => {
             appState.selectedAccount.canais[channel] = "conectado";
             this.renderChannels(appState.selectedAccount.canais);
-            utils.showNotification(
-              `${utils.getChannelName(channel)} conectado com sucesso!`,
-              "success"
-            );
           }, 1500);
         });
       }
@@ -2372,10 +2287,7 @@ const components = {
       const settingsBtn = item.querySelector(".channel-settings-btn");
       if (settingsBtn) {
         settingsBtn.addEventListener("click", () => {
-          utils.showNotification(
-            `Configurações do ${utils.getChannelName(channel)}`,
-            "info"
-          );
+          // Configurações do canal
         });
       }
 
@@ -2435,7 +2347,6 @@ const components = {
         if (confirm("Tem certeza que deseja excluir este usuário?")) {
           appState.selectedAccount.usuarios_detalhados.splice(index, 1);
           this.renderUsersTable(appState.selectedAccount.usuarios_detalhados);
-          utils.showNotification("Usuário excluído com sucesso!", "success");
         }
       });
 
@@ -2595,73 +2506,10 @@ const components = {
             }
             appState.selectedSubaccount.canais[channel] = "conectado";
             this.renderSubaccountChannels();
-            utils.showNotification(
-              `${utils.getChannelName(
-                channel
-              )} integrado com sucesso na subconta!`,
-              "success"
-            );
           }
         });
       }
 
-      container.appendChild(item);
-    });
-  },
-
-  renderNotifications() {
-    const container = document.getElementById("notificationList");
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    const notifications = [
-      {
-        type: "user",
-        title: "Novo usuário criado",
-        description: "João Silva foi adicionado à conta Cantina do Marcio",
-        time: "2025-07-15T14:00:00",
-        unread: true,
-      },
-      {
-        type: "error",
-        title: "Erro de API detectado",
-        description: "Endpoint /api/messages apresentou 6 erros",
-        time: "2025-07-15T13:30:00",
-        unread: true,
-      },
-      {
-        type: "integration",
-        title: "Nova integração",
-        description: "WhatsApp integrado com sucesso na conta Tech Solutions",
-        time: "2025-07-15T12:45:00",
-        unread: false,
-      },
-    ];
-
-    notifications.forEach((notification) => {
-      const item = document.createElement("div");
-      item.className = `notification-item ${
-        notification.unread ? "unread" : ""
-      }`;
-      item.innerHTML = `
-        <div class="notification-icon">
-          <i class="fas fa-${
-            notification.type === "user"
-              ? "user-plus"
-              : notification.type === "error"
-              ? "exclamation-triangle"
-              : "plug"
-          }"></i>
-        </div>
-        <div class="notification-content">
-          <h4>${notification.title}</h4>
-          <p>${notification.description}</p>
-          <span class="notification-time">${utils.formatDateTime(
-            notification.time
-          )}</span>
-        </div>
-      `;
       container.appendChild(item);
     });
   },
@@ -2743,9 +2591,6 @@ const components = {
       btn.classList.toggle("active", btn.dataset.mode === appState.mode);
     });
 
-    // Renderizar notificações
-    this.renderNotifications();
-
     console.log("UI atualizada com sucesso");
   },
 
@@ -2814,10 +2659,7 @@ const components = {
         element.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          utils.showNotification(
-            "Esta funcionalidade está disponível apenas no modo MASTER. Troque para o modo MASTER para acessar.",
-            "warning"
-          );
+          // Funcionalidade restrita ao modo MASTER
         });
       }
     });
@@ -2871,7 +2713,6 @@ function setupEventListeners() {
     "applyFilter",
     "click",
     () => {
-      utils.showNotification("Filtros aplicados com sucesso!", "success");
       components.updateUI();
     },
     "Aplicar filtros"
@@ -2964,10 +2805,6 @@ function setupEventListeners() {
         MTMO: company.mtmo,
       }));
       utils.exportToCSV(companies, "empresas.csv");
-      utils.showNotification(
-        "Dados das empresas exportados com sucesso!",
-        "success"
-      );
     });
   }
 
@@ -3037,7 +2874,6 @@ function setupEventListeners() {
       MTMO: acc.mtmo,
     }));
     utils.exportToCSV(csvData, "ranking_contas.csv");
-    utils.showNotification("Ranking exportado com sucesso!", "success");
   });
 
   document.getElementById("exportLogs").addEventListener("click", () => {
@@ -3081,7 +2917,6 @@ function setupEventListeners() {
       Mensagem: log.mensagem,
     }));
     utils.exportToCSV(csvData, "logs_pesquisa.csv");
-    utils.showNotification("Logs exportados com sucesso!", "success");
   });
 
   // Navegação
@@ -3098,9 +2933,7 @@ function setupEventListeners() {
   });
 
   // Ações da conta
-  document.getElementById("generateReport").addEventListener("click", () => {
-    utils.showNotification("Relatório gerado com sucesso!", "success");
-  });
+  document.getElementById("generateReport").addEventListener("click", () => {});
 
   // Modais - CORRIGIDO
   document.getElementById("createUser").addEventListener("click", () => {
@@ -3133,7 +2966,6 @@ function setupEventListeners() {
       appState.selectedAccount.id = id;
       appState.selectedAccount.status = status;
       components.updateUI();
-      utils.showNotification("Conta atualizada com sucesso!", "success");
     }
   });
 
@@ -3164,7 +2996,6 @@ function setupEventListeners() {
         }
 
         components.updateUI();
-        utils.showNotification("Subconta atualizada com sucesso!", "success");
       }
     });
   }
@@ -3224,7 +3055,6 @@ function setupEventListeners() {
       });
       components.renderUsersTable(appState.selectedAccount.usuarios_detalhados);
       utils.closeModal();
-      utils.showNotification("Usuário criado com sucesso!", "success");
     }
   });
 
@@ -3303,22 +3133,6 @@ function setupEventListeners() {
     }
   });
 
-  // Painel de notificações
-  document.getElementById("notificationBtn").addEventListener("click", () => {
-    document.getElementById("notificationPanel").classList.toggle("active");
-  });
-
-  document.getElementById("markAllRead").addEventListener("click", () => {
-    document.querySelectorAll(".notification-item").forEach((item) => {
-      item.classList.remove("unread");
-    });
-    document.querySelector(".notification-badge").textContent = "0";
-    utils.showNotification(
-      "Todas as notificações foram marcadas como lidas!",
-      "info"
-    );
-  });
-
   // Navegação por teclado
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -3353,17 +3167,6 @@ function setupEventListeners() {
       ) {
         appState.sidebarOpen = false;
         document.getElementById("sidebar").classList.remove("active");
-      }
-    }
-
-    if (
-      document.getElementById("notificationPanel").classList.contains("active")
-    ) {
-      if (
-        !document.getElementById("notificationPanel").contains(e.target) &&
-        !document.getElementById("notificationBtn").contains(e.target)
-      ) {
-        document.getElementById("notificationPanel").classList.remove("active");
       }
     }
   });
@@ -3419,7 +3222,6 @@ function init() {
     components.updateUI();
     // Garantir que as restrições de modo sejam aplicadas na inicialização
     components.applyModeRestrictions();
-    utils.showNotification("Dashboard carregado com sucesso!", "success");
   } else {
     console.error("Chart.js não foi carregado");
     // Renderizar sem gráficos primeiro
@@ -3436,8 +3238,6 @@ function init() {
         console.error("Chart.js ainda não está disponível");
       }
     }, 1000);
-
-    utils.showNotification("Dashboard carregado (sem gráficos)", "info");
   }
 }
 
