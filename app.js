@@ -428,6 +428,7 @@ let appState = {
   expandedNodes: new Set(),
   currentPageNum: 1,
   itemsPerPage: 10,
+  editingUser: null,
   filters: {
     searchTerm: "",
     type: "",
@@ -704,6 +705,226 @@ const components = {
     appState.selectedSubaccount = subaccount;
     appState.currentPage = "subaccountDetail";
     this.updateUI();
+  },
+
+  openUsersManagementModal(companyId) {
+    const company = utils.findAccountById(appData.contas, companyId);
+    if (!company) {
+      console.error("Empresa não encontrada:", companyId);
+      return;
+    }
+
+    // Atualizar o título do modal
+    const companyNameHeader = document.getElementById("companyNameHeader");
+    if (companyNameHeader) {
+      companyNameHeader.textContent = company.nome;
+    }
+
+    // Renderizar a lista de usuários
+    this.renderUsersManagementTable(company);
+
+    // Abrir o modal
+    utils.openModal("manageUsersModal");
+  },
+
+  renderUsersManagementTable(company) {
+    const tbody = document.getElementById("manageUsersTableBody");
+    if (!tbody) {
+      console.error("Elemento manageUsersTableBody não encontrado");
+      return;
+    }
+
+    tbody.innerHTML = "";
+
+    if (!company.usuarios_detalhados || company.usuarios_detalhados.length === 0) {
+      const emptyRow = document.createElement("tr");
+      emptyRow.innerHTML = `
+        <td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: var(--space-24);">
+          Nenhum usuário encontrado
+        </td>
+      `;
+      tbody.appendChild(emptyRow);
+      return;
+    }
+
+    company.usuarios_detalhados.forEach((user, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${user.nome}</td>
+        <td>${user.email}</td>
+        <td>
+          <span class="status status--${user.cargo.toLowerCase()}">
+            ${user.cargo}
+          </span>
+        </td>
+        <td>
+          <div class="user-status user-status--${user.status}">
+            <span class="user-status-indicator"></span>
+            ${user.status === 'online' ? 'Online' : 'Offline'}
+          </div>
+        </td>
+        <td>${utils.formatDate(user.ultimoLogin)}</td>
+        <td>
+          <div class="user-actions">
+            <button class="btn btn--sm btn--primary user-edit-btn" 
+                    data-user-index="${index}" 
+                    data-company-id="${company.id}" 
+                    title="Editar usuário">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn--sm user-delete-btn" 
+                    data-user-index="${index}" 
+                    data-company-id="${company.id}" 
+                    title="Excluir usuário">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      `;
+
+      // Adicionar event listeners para os botões de ação
+      const editBtn = row.querySelector(".user-edit-btn");
+      const deleteBtn = row.querySelector(".user-delete-btn");
+
+      if (editBtn) {
+        editBtn.addEventListener("click", () => {
+          this.openEditUserModal(company.id, index);
+        });
+      }
+
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", () => {
+          this.deleteUser(company.id, index);
+        });
+      }
+
+      tbody.appendChild(row);
+    });
+  },
+
+  openEditUserModal(companyId, userIndex) {
+    const company = utils.findAccountById(appData.contas, companyId);
+    if (!company || !company.usuarios_detalhados[userIndex]) {
+      console.error("Usuário não encontrado");
+      return;
+    }
+
+    const user = company.usuarios_detalhados[userIndex];
+
+    // Preencher o formulário
+    document.getElementById("editUserName").value = user.nome;
+    document.getElementById("editUserEmail").value = user.email;
+    document.getElementById("editUserRole").value = user.cargo.toLowerCase();
+
+    // Armazenar dados para edição
+    appState.editingUser = { companyId, userIndex };
+
+    // Abrir modal
+    utils.openModal("editUserModal");
+  },
+
+  deleteUser(companyId, userIndex) {
+    const company = utils.findAccountById(appData.contas, companyId);
+    if (!company || !company.usuarios_detalhados[userIndex]) {
+      console.error("Usuário não encontrado");
+      return;
+    }
+
+    const user = company.usuarios_detalhados[userIndex];
+    
+    if (confirm(`Tem certeza que deseja excluir o usuário "${user.nome}"?`)) {
+      // Remover usuário do array
+      company.usuarios_detalhados.splice(userIndex, 1);
+      
+      // Atualizar contadores
+      if (company.usuarios > 0) {
+        company.usuarios--;
+      }
+      if (user.status === 'online' && company.usuariosOnline > 0) {
+        company.usuariosOnline--;
+      }
+
+      // Renderizar novamente a tabela
+      this.renderUsersManagementTable(company);
+      
+      // Atualizar a tabela principal de empresas
+      this.renderCompaniesTable();
+
+      utils.showNotification("Usuário excluído com sucesso!", "success");
+    }
+  },
+
+  inviteUser(companyId, email, role) {
+    const company = utils.findAccountById(appData.contas, companyId);
+    if (!company) {
+      console.error("Empresa não encontrada");
+      return;
+    }
+
+    // Verificar se o email já existe
+    const emailExists = company.usuarios_detalhados?.some(user => user.email === email);
+    if (emailExists) {
+      utils.showNotification("Este email já está cadastrado!", "error");
+      return;
+    }
+
+    // Criar novo usuário
+    const newUser = {
+      nome: email.split('@')[0], // Nome temporário baseado no email
+      email: email,
+      cargo: role.charAt(0).toUpperCase() + role.slice(1),
+      ultimoLogin: new Date().toISOString(),
+      status: 'offline'
+    };
+
+    // Inicializar array se não existir
+    if (!company.usuarios_detalhados) {
+      company.usuarios_detalhados = [];
+    }
+
+    // Adicionar usuário
+    company.usuarios_detalhados.push(newUser);
+    
+    // Atualizar contadores
+    company.usuarios = (company.usuarios || 0) + 1;
+
+    // Renderizar novamente a tabela
+    this.renderUsersManagementTable(company);
+    
+    // Atualizar a tabela principal de empresas
+    this.renderCompaniesTable();
+
+    utils.showNotification("Usuário convidado com sucesso!", "success");
+  },
+
+  saveUserEdit() {
+    if (!appState.editingUser) {
+      console.error("Nenhum usuário sendo editado");
+      return;
+    }
+
+    const { companyId, userIndex } = appState.editingUser;
+    const company = utils.findAccountById(appData.contas, companyId);
+    
+    if (!company || !company.usuarios_detalhados[userIndex]) {
+      console.error("Usuário não encontrado para edição");
+      return;
+    }
+
+    const newRole = document.getElementById("editUserRole").value;
+    const roleCapitalized = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+
+    // Atualizar o cargo do usuário
+    company.usuarios_detalhados[userIndex].cargo = roleCapitalized;
+
+    // Fechar modal e limpar estado
+    utils.closeModal("editUserModal");
+    appState.editingUser = null;
+
+    // Renderizar novamente a tabela
+    this.renderUsersManagementTable(company);
+
+    utils.showNotification("Usuário atualizado com sucesso!", "success");
   },
 
   toggleNode(accountId) {
@@ -1177,6 +1398,11 @@ const components = {
           }" data-level="${level}" title="Ver detalhes">
             <i class="fas fa-eye"></i>
           </button>
+          <button class="btn btn--sm btn--info users-manager-btn" data-company-id="${
+            account.id
+          }" title="Gerenciar usuários">
+            <i class="fas fa-users"></i>
+          </button>
           <button class="btn btn--sm btn--secondary action-btn" title="Configurações">
             <i class="fas fa-cog"></i>
           </button>
@@ -1220,6 +1446,16 @@ const components = {
             this.selectSubaccount(subaccount);
           }
         }
+      });
+    }
+
+    // Event listener para o botão de gerenciar usuários
+    const usersBtn = row.querySelector(".users-manager-btn");
+    if (usersBtn) {
+      usersBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openUsersManagementModal(account.id);
       });
     }
 

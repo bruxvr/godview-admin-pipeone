@@ -767,6 +767,121 @@
           </form>
         </div>
       </div>
+
+      <!-- Manage Users Modal -->
+      <div class="modal modal-large hidden" id="manageUsersModal">
+        <div class="modal-header">
+          <h3>Gerenciar Usuários - <span id="companyNameHeader"></span></h3>
+          <button class="modal-close" id="closeManageUsersModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="users-management-content">
+            <!-- Add User Section -->
+            <div class="add-user-section">
+              <h4>Convidar Usuário</h4>
+              <form id="inviteUserForm" class="invite-user-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="inviteUserEmail"
+                      placeholder="usuario@email.com"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Cargo</label>
+                    <select class="form-control" id="inviteUserRole">
+                      <option value="admin">Admin</option>
+                      <option value="manager">Manager</option>
+                      <option value="agent">Agent</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn--primary">
+                      <i class="fas fa-user-plus"></i> Convidar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Users List Section -->
+            <div class="users-list-section">
+              <h4>Usuários da Empresa</h4>
+              <div class="table-container">
+                <table class="data-table" id="manageUsersTable">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Email</th>
+                      <th>Cargo</th>
+                      <th>Status</th>
+                      <th>Último Login</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="manageUsersTableBody">
+                    <!-- Usuários serão inseridos aqui -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit User Modal -->
+      <div class="modal hidden" id="editUserModal">
+        <div class="modal-header">
+          <h3>Editar Usuário</h3>
+          <button class="modal-close" id="closeEditUserModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editUserForm">
+            <div class="form-group">
+              <label class="form-label">Nome</label>
+              <input
+                type="text"
+                class="form-control"
+                id="editUserName"
+                required
+                readonly
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="editUserEmail"
+                required
+                readonly
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo</label>
+              <select class="form-control" id="editUserRole">
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="agent">Agent</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn--secondary" id="cancelEditUser">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn--primary">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- Notification Panel -->
