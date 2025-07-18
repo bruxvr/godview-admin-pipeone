@@ -1966,6 +1966,23 @@ select.form-control {
   border-color: rgba(var(--color-info-rgb), 0.8);
 }
 
+/* Button Success Style */
+.btn--success {
+  background-color: rgba(var(--color-success-rgb), 1);
+  color: var(--color-btn-primary-text);
+  border: 1px solid rgba(var(--color-success-rgb), 1);
+}
+
+.btn--success:hover {
+  background-color: rgba(var(--color-success-rgb), 0.9);
+  border-color: rgba(var(--color-success-rgb), 0.9);
+}
+
+.btn--success:active {
+  background-color: rgba(var(--color-success-rgb), 0.8);
+  border-color: rgba(var(--color-success-rgb), 0.8);
+}
+
 /* Status Indicators for Users */
 .user-status {
   display: inline-flex;
@@ -2167,4 +2184,48 @@ select.form-control {
     justify-content: center;
     flex-wrap: wrap;
   }
+}
+
+/* Create Subaccount Modal Styles */
+.form-info {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-12);
+  margin: var(--space-16) 0;
+}
+
+.info-text {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.info-text i {
+  color: var(--color-info);
+  margin-top: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Textarea styles */
+.form-control[rows] {
+  resize: vertical;
+  min-height: 80px;
+  font-family: var(--font-family-base);
+}
+
+/* Required field indicator */
+.form-label::after {
+  content: "";
+}
+
+.form-label:has(+ input[required])::after,
+.form-label:has(+ select[required])::after,
+.form-label:has(+ textarea[required])::after {
+  content: " *";
+  color: var(--color-error);
 }

@@ -485,6 +485,7 @@ let appState = {
   itemsPerPage: 10,
   editingUser: null,
   editingAccount: null,
+  creatingSubaccountFor: null,
   filters: {
     searchTerm: "",
     type: "",
@@ -691,6 +692,7 @@ const utils = {
     // Limpar estado de edição
     appState.editingUser = null;
     appState.editingAccount = null;
+    appState.creatingSubaccountFor = null;
   },
 };
 
@@ -1209,6 +1211,140 @@ const components = {
     }
   },
 
+  openCreateSubaccountModal(parentCompanyId) {
+    const parentCompany = utils.findAccountById(
+      appData.contas,
+      parentCompanyId
+    );
+    if (!parentCompany) {
+      console.error("Empresa principal não encontrada:", parentCompanyId);
+      return;
+    }
+
+    // Limpar formulário e preparar para nova subconta
+    this.resetCreateSubaccountForm();
+
+    // Armazenar o ID da empresa pai
+    appState.creatingSubaccountFor = parentCompanyId;
+
+    // Atualizar título do modal com nome da empresa pai
+    const modalTitle = document.querySelector(
+      "#createSubaccountModal .modal-header h3"
+    );
+    if (modalTitle) {
+      modalTitle.textContent = `Criar Subconta - ${parentCompany.nome}`;
+    }
+
+    // Abrir o modal
+    utils.openModal("createSubaccountModal");
+  },
+
+  resetCreateSubaccountForm() {
+    document.getElementById("subaccountNameInput").value = "";
+    document.getElementById("subaccountTypeInput").value = "Department";
+
+    // Limpar campos adicionais se existirem
+    const descriptionField = document.getElementById("subaccountDescription");
+    const responsibleField = document.getElementById("subaccountResponsible");
+    const emailField = document.getElementById("subaccountEmail");
+
+    if (descriptionField) descriptionField.value = "";
+    if (responsibleField) responsibleField.value = "";
+    if (emailField) emailField.value = "";
+  },
+
+  createSubaccount() {
+    if (!appState.creatingSubaccountFor) {
+      console.error("Nenhuma empresa pai definida para criar subconta");
+      return;
+    }
+
+    const parentCompany = utils.findAccountById(
+      appData.contas,
+      appState.creatingSubaccountFor
+    );
+    if (!parentCompany) {
+      console.error("Empresa pai não encontrada");
+      return;
+    }
+
+    // Obter dados do formulário
+    const name = document.getElementById("subaccountNameInput").value.trim();
+    const type = document.getElementById("subaccountTypeInput").value;
+    const description =
+      document.getElementById("subaccountDescription")?.value.trim() || "";
+    const responsible =
+      document.getElementById("subaccountResponsible")?.value.trim() || "";
+    const email =
+      document.getElementById("subaccountEmail")?.value.trim() || "";
+
+    // Validações
+    if (!name) {
+      utils.showNotification("Nome da subconta é obrigatório!", "error");
+      return;
+    }
+
+    // Verificar se já existe subconta com o mesmo nome
+    if (
+      parentCompany.subcontas &&
+      parentCompany.subcontas.some(
+        (sub) => sub.nome.toLowerCase() === name.toLowerCase()
+      )
+    ) {
+      utils.showNotification("Já existe uma subconta com este nome!", "error");
+      return;
+    }
+
+    // Criar nova subconta
+    const newSubaccount = {
+      id: Date.now(), // ID único baseado em timestamp
+      nome: name,
+      tipo: type,
+      status: "Active",
+      contatos: 0,
+      mtmo: 0,
+      usuarios: 0,
+      usuariosOnline: 0,
+      conversasAbertas: 0,
+      bulksRealizados: 0,
+      mensagensEnviadas: 0,
+      descricao: description,
+      responsavel: responsible,
+      email: email,
+      dataCriacao: new Date().toISOString(),
+      canais: {
+        whatsapp: "desconectado",
+        instagram: "desconectado",
+        messenger: "desconectado",
+        gmail: "desconectado",
+        telegram: "desconectado",
+        api: "desconectado",
+      },
+      usuarios_detalhados: [],
+    };
+
+    // Inicializar array de subcontas se não existir
+    if (!parentCompany.subcontas) {
+      parentCompany.subcontas = [];
+    }
+
+    // Adicionar nova subconta
+    parentCompany.subcontas.push(newSubaccount);
+
+    // Expandir automaticamente a empresa pai para mostrar a nova subconta
+    appState.expandedNodes.add(parentCompany.id);
+
+    // Fechar modal e limpar estado
+    utils.closeModal();
+    appState.creatingSubaccountFor = null;
+
+    // Atualizar a interface
+    this.renderCompaniesTable();
+    this.renderSidebar();
+
+    utils.showNotification(`Subconta "${name}" criada com sucesso!`, "success");
+  },
+
   toggleNode(accountId) {
     if (appState.expandedNodes.has(accountId)) {
       appState.expandedNodes.delete(accountId);
@@ -1692,9 +1828,15 @@ const components = {
           <button class="btn btn--sm btn--secondary action-btn" title="Configurações">
             <i class="fas fa-cog"></i>
           </button>
-          <button class="btn btn--sm btn--outline action-btn" title="Mais opções">
-            <i class="fas fa-ellipsis-h"></i>
+          ${
+            level === 0
+              ? `
+          <button class="btn btn--sm btn--success create-subaccount-btn" data-company-id="${account.id}" title="Criar subconta">
+            <i class="fas fa-plus"></i>
           </button>
+          `
+              : ""
+          }
         </div>
       </td>
     `;
@@ -1752,6 +1894,16 @@ const components = {
         e.preventDefault();
         e.stopPropagation();
         this.openAccountSettingsModal(account.id);
+      });
+    }
+
+    // Event listener para o botão de criar subconta
+    const createSubaccountBtn = row.querySelector(".create-subaccount-btn");
+    if (createSubaccountBtn) {
+      createSubaccountBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openCreateSubaccountModal(account.id);
       });
     }
 
@@ -3014,26 +3166,7 @@ function setupEventListeners() {
     .getElementById("createSubaccountForm")
     .addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = document.getElementById("subaccountNameInput").value;
-      const type = document.getElementById("subaccountTypeInput").value;
-
-      if (appState.selectedAccount) {
-        if (!appState.selectedAccount.subcontas) {
-          appState.selectedAccount.subcontas = [];
-        }
-        const newSubaccount = {
-          id: Date.now(),
-          nome: name,
-          tipo: type,
-          status: "Active",
-          contatos: 0,
-          mtmo: 0,
-        };
-        appState.selectedAccount.subcontas.push(newSubaccount);
-        components.renderSubaccountsTable(appState.selectedAccount.subcontas);
-        utils.closeModal();
-        utils.showNotification("Subconta criada com sucesso!", "success");
-      }
+      components.createSubaccount();
     });
 
   // Formulário de convidar usuário

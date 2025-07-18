@@ -729,7 +729,7 @@
       </div>
 
       <!-- Create Subaccount Modal -->
-      <div class="modal hidden" id="createSubaccountModal">
+      <div class="modal modal-medium hidden" id="createSubaccountModal">
         <div class="modal-header">
           <h3>Criar Subconta</h3>
           <button class="modal-close" id="closeSubaccountModal">
@@ -738,22 +738,66 @@
         </div>
         <div class="modal-body">
           <form id="createSubaccountForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nome da Subconta *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="subaccountNameInput"
+                  placeholder="Digite o nome da subconta"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tipo *</label>
+                <select class="form-control" id="subaccountTypeInput">
+                  <option value="Department">Department</option>
+                  <option value="Team">Team</option>
+                </select>
+              </div>
+            </div>
+
             <div class="form-group">
-              <label class="form-label">Nome da Subconta</label>
-              <input
-                type="text"
+              <label class="form-label">Descrição</label>
+              <textarea
                 class="form-control"
-                id="subaccountNameInput"
-                required
-              />
+                id="subaccountDescription"
+                rows="3"
+                placeholder="Descreva o propósito e responsabilidades desta subconta"
+              ></textarea>
             </div>
-            <div class="form-group">
-              <label class="form-label">Tipo</label>
-              <select class="form-control" id="subaccountTypeInput">
-                <option value="Department">Department</option>
-                <option value="Team">Team</option>
-              </select>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Responsável</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="subaccountResponsible"
+                  placeholder="Nome do responsável pela subconta"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email de Contato</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="subaccountEmail"
+                  placeholder="email@exemplo.com"
+                />
+              </div>
             </div>
+
+            <div class="form-info">
+              <p class="info-text">
+                <i class="fas fa-info-circle"></i>
+                A subconta será criada com status ativo e todos os canais
+                desconectados. Você poderá configurar os canais e adicionar
+                usuários após a criação.
+              </p>
+            </div>
+
             <div class="modal-actions">
               <button
                 type="button"
@@ -762,7 +806,9 @@
               >
                 Cancelar
               </button>
-              <button type="submit" class="btn btn--primary">Criar</button>
+              <button type="submit" class="btn btn--primary">
+                <i class="fas fa-plus"></i> Criar Subconta
+              </button>
             </div>
           </form>
         </div>
