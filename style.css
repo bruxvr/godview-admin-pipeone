@@ -537,6 +537,31 @@ select.form-control {
     rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
 }
 
+/* Status styles for user roles */
+.status--admin {
+  background-color: rgba(var(--color-error-rgb), var(--status-bg-opacity));
+  color: rgba(var(--color-error-rgb), 1);
+  border: 1px solid rgba(var(--color-error-rgb), var(--status-border-opacity));
+}
+
+.status--manager {
+  background-color: rgba(var(--color-warning-rgb), var(--status-bg-opacity));
+  color: rgba(var(--color-warning-rgb), 1);
+  border: 1px solid rgba(var(--color-warning-rgb), var(--status-border-opacity));
+}
+
+.status--agent {
+  background-color: rgba(var(--color-info-rgb), var(--status-bg-opacity));
+  color: rgba(var(--color-info-rgb), 1);
+  border: 1px solid rgba(var(--color-info-rgb), var(--status-border-opacity));
+}
+
+.status--user {
+  background-color: rgba(var(--color-info-rgb), var(--status-bg-opacity));
+  color: rgba(var(--color-info-rgb), 1);
+  border: 1px solid rgba(var(--color-info-rgb), var(--status-border-opacity));
+}
+
 /* Container layout */
 .container {
   width: 100%;
@@ -1803,7 +1828,7 @@ select.form-control {
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--duration-normal) var(--ease-standard),
-              visibility var(--duration-normal) var(--ease-standard);
+    visibility var(--duration-normal) var(--ease-standard);
 }
 
 .modal-overlay.active {
@@ -1855,7 +1880,7 @@ select.form-control {
   padding: var(--space-8);
   border-radius: var(--radius-sm);
   transition: color var(--duration-fast) var(--ease-standard),
-              background-color var(--duration-fast) var(--ease-standard);
+    background-color var(--duration-fast) var(--ease-standard);
 }
 
 .modal-close:hover {

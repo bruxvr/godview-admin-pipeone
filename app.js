@@ -161,6 +161,20 @@ const appData = {
           ultimoLogin: "2025-07-15 16:00",
           status: "online",
         },
+        {
+          nome: "Marcus Aguiar",
+          email: "marcus@boteco.com",
+          cargo: "Manager",
+          ultimoLogin: "2025-07-15 15:15",
+          status: "online",
+        },
+        {
+          nome: "Sofia Pereira",
+          email: "sofia@boteco.com",
+          cargo: "Agent",
+          ultimoLogin: "2025-07-15 14:30",
+          status: "offline",
+        },
       ],
     },
     {
@@ -192,6 +206,20 @@ const appData = {
           cargo: "Admin",
           ultimoLogin: "2025-07-15 15:30",
           status: "online",
+        },
+        {
+          nome: "Pedro Santos",
+          email: "pedro@lojinha.com",
+          cargo: "Manager",
+          ultimoLogin: "2025-07-15 14:45",
+          status: "online",
+        },
+        {
+          nome: "Ana Oliveira",
+          email: "ana@lojinha.com",
+          cargo: "Agent",
+          ultimoLogin: "2025-07-14 18:20",
+          status: "offline",
         },
       ],
     },
@@ -294,6 +322,20 @@ const appData = {
           email: "lisa@tech.com",
           cargo: "Manager",
           ultimoLogin: "2025-07-15 15:45",
+          status: "online",
+        },
+        {
+          nome: "Carlos Dev",
+          email: "carlos@tech.com",
+          cargo: "Agent",
+          ultimoLogin: "2025-07-15 13:20",
+          status: "offline",
+        },
+        {
+          nome: "Maria Designer",
+          email: "maria@tech.com",
+          cargo: "Manager",
+          ultimoLogin: "2025-07-15 16:00",
           status: "online",
         },
       ],
@@ -623,6 +665,15 @@ const utils = {
     // Resetar formulários
     document.getElementById("createUserForm").reset();
     document.getElementById("createSubaccountForm").reset();
+
+    // Resetar formulários dos novos modais
+    const inviteForm = document.getElementById("inviteUserForm");
+    const editForm = document.getElementById("editUserForm");
+    if (inviteForm) inviteForm.reset();
+    if (editForm) editForm.reset();
+
+    // Limpar estado de edição
+    appState.editingUser = null;
   },
 };
 
@@ -736,7 +787,10 @@ const components = {
 
     tbody.innerHTML = "";
 
-    if (!company.usuarios_detalhados || company.usuarios_detalhados.length === 0) {
+    if (
+      !company.usuarios_detalhados ||
+      company.usuarios_detalhados.length === 0
+    ) {
       const emptyRow = document.createElement("tr");
       emptyRow.innerHTML = `
         <td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: var(--space-24);">
@@ -760,7 +814,7 @@ const components = {
         <td>
           <div class="user-status user-status--${user.status}">
             <span class="user-status-indicator"></span>
-            ${user.status === 'online' ? 'Online' : 'Offline'}
+            ${user.status === "online" ? "Online" : "Offline"}
           </div>
         </td>
         <td>${utils.formatDate(user.ultimoLogin)}</td>
@@ -831,22 +885,22 @@ const components = {
     }
 
     const user = company.usuarios_detalhados[userIndex];
-    
+
     if (confirm(`Tem certeza que deseja excluir o usuário "${user.nome}"?`)) {
       // Remover usuário do array
       company.usuarios_detalhados.splice(userIndex, 1);
-      
+
       // Atualizar contadores
       if (company.usuarios > 0) {
         company.usuarios--;
       }
-      if (user.status === 'online' && company.usuariosOnline > 0) {
+      if (user.status === "online" && company.usuariosOnline > 0) {
         company.usuariosOnline--;
       }
 
       // Renderizar novamente a tabela
       this.renderUsersManagementTable(company);
-      
+
       // Atualizar a tabela principal de empresas
       this.renderCompaniesTable();
 
@@ -862,7 +916,9 @@ const components = {
     }
 
     // Verificar se o email já existe
-    const emailExists = company.usuarios_detalhados?.some(user => user.email === email);
+    const emailExists = company.usuarios_detalhados?.some(
+      (user) => user.email === email
+    );
     if (emailExists) {
       utils.showNotification("Este email já está cadastrado!", "error");
       return;
@@ -870,11 +926,11 @@ const components = {
 
     // Criar novo usuário
     const newUser = {
-      nome: email.split('@')[0], // Nome temporário baseado no email
+      nome: email.split("@")[0], // Nome temporário baseado no email
       email: email,
       cargo: role.charAt(0).toUpperCase() + role.slice(1),
       ultimoLogin: new Date().toISOString(),
-      status: 'offline'
+      status: "offline",
     };
 
     // Inicializar array se não existir
@@ -884,13 +940,13 @@ const components = {
 
     // Adicionar usuário
     company.usuarios_detalhados.push(newUser);
-    
+
     // Atualizar contadores
     company.usuarios = (company.usuarios || 0) + 1;
 
     // Renderizar novamente a tabela
     this.renderUsersManagementTable(company);
-    
+
     // Atualizar a tabela principal de empresas
     this.renderCompaniesTable();
 
@@ -905,7 +961,7 @@ const components = {
 
     const { companyId, userIndex } = appState.editingUser;
     const company = utils.findAccountById(appData.contas, companyId);
-    
+
     if (!company || !company.usuarios_detalhados[userIndex]) {
       console.error("Usuário não encontrado para edição");
       return;
@@ -918,7 +974,7 @@ const components = {
     company.usuarios_detalhados[userIndex].cargo = roleCapitalized;
 
     // Fechar modal e limpar estado
-    utils.closeModal("editUserModal");
+    utils.closeModal();
     appState.editingUser = null;
 
     // Renderizar novamente a tabela
@@ -1317,9 +1373,13 @@ const components = {
       ? Object.entries(account.canais)
           .map(([channel, status]) => {
             const isIntegrated = status === "conectado";
-            const integrationClass = isIntegrated ? "integrated" : "not-integrated";
+            const integrationClass = isIntegrated
+              ? "integrated"
+              : "not-integrated";
             return `<div class="channel-icon ${channel} ${integrationClass}" 
-                          title="${utils.getChannelName(channel)} - ${isIntegrated ? 'Integrado' : 'Clique para integrar'}"
+                          title="${utils.getChannelName(channel)} - ${
+              isIntegrated ? "Integrado" : "Clique para integrar"
+            }"
                           data-channel="${channel}"
                           data-company-id="${account.id}"
                           data-integrated="${isIntegrated}">
@@ -1460,16 +1520,16 @@ const components = {
     }
 
     // Adicionar event listeners para os ícones de canal
-    const channelIconElements = row.querySelectorAll('.channel-icon');
-    channelIconElements.forEach(icon => {
-      icon.addEventListener('click', (e) => {
+    const channelIconElements = row.querySelectorAll(".channel-icon");
+    channelIconElements.forEach((icon) => {
+      icon.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const channel = icon.dataset.channel;
         const companyId = icon.dataset.companyId;
-        const isIntegrated = icon.dataset.integrated === 'true';
-        
+        const isIntegrated = icon.dataset.integrated === "true";
+
         if (!isIntegrated) {
           this.integrateChannel(companyId, channel, icon);
         }
@@ -1482,37 +1542,42 @@ const components = {
   integrateChannel(companyId, channel, iconElement) {
     // Simular integração
     const channelName = utils.getChannelName(channel);
-    
+
     if (confirm(`Deseja integrar ${channelName} para esta empresa?`)) {
       // Atualizar visualmente o ícone
-      iconElement.classList.remove('not-integrated');
-      iconElement.classList.add('integrated');
-      iconElement.dataset.integrated = 'true';
+      iconElement.classList.remove("not-integrated");
+      iconElement.classList.add("integrated");
+      iconElement.dataset.integrated = "true";
       iconElement.title = `${channelName} - Integrado`;
-      
+
       // Atualizar os dados (em uma aplicação real, isso seria uma chamada API)
-      const company = utils.findAccountById(appData.contas, parseInt(companyId));
+      const company = utils.findAccountById(
+        appData.contas,
+        parseInt(companyId)
+      );
       if (company && company.canais) {
-        company.canais[channel] = 'conectado';
+        company.canais[channel] = "conectado";
       }
-      
+
       // Mostrar feedback
-      this.showNotification(`${channelName} integrado com sucesso!`, 'success');
+      this.showNotification(`${channelName} integrado com sucesso!`, "success");
     }
   },
 
-  showNotification(message, type = 'info') {
+  showNotification(message, type = "info") {
     // Criar elemento de notificação
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.className = `notification-toast ${type}`;
     notification.innerHTML = `
-      <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+      <i class="fas fa-${
+        type === "success" ? "check-circle" : "info-circle"
+      }"></i>
       <span>${message}</span>
     `;
-    
+
     // Adicionar ao body
     document.body.appendChild(notification);
-    
+
     // Remover após 3 segundos
     setTimeout(() => {
       notification.remove();
@@ -2669,6 +2734,15 @@ function setupEventListeners() {
   document
     .getElementById("cancelSubaccountModal")
     .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("closeManageUsersModal")
+    .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("closeEditUserModal")
+    .addEventListener("click", utils.closeModal);
+  document
+    .getElementById("cancelEditUser")
+    .addEventListener("click", utils.closeModal);
 
   // Formulários dos modais
   document.getElementById("createUserForm").addEventListener("submit", (e) => {
@@ -2719,6 +2793,34 @@ function setupEventListeners() {
         utils.showNotification("Subconta criada com sucesso!", "success");
       }
     });
+
+  // Formulário de convidar usuário
+  document.getElementById("inviteUserForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("inviteUserEmail").value;
+    const role = document.getElementById("inviteUserRole").value;
+
+    // Encontrar a empresa atualmente sendo gerenciada
+    const companyNameHeader = document.getElementById("companyNameHeader");
+    if (companyNameHeader && companyNameHeader.textContent) {
+      const companyName = companyNameHeader.textContent;
+      const company = appData.contas.find((c) => c.nome === companyName);
+
+      if (company) {
+        components.inviteUser(company.id, email, role);
+
+        // Limpar formulário
+        document.getElementById("inviteUserEmail").value = "";
+        document.getElementById("inviteUserRole").value = "admin";
+      }
+    }
+  });
+
+  // Formulário de editar usuário
+  document.getElementById("editUserForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    components.saveUserEdit();
+  });
 
   // Fechar modal clicando fora
   document.getElementById("modalOverlay").addEventListener("click", (e) => {
